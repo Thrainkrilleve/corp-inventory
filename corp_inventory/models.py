@@ -17,6 +17,15 @@ class Corporation(models.Model):
     # Tracking enabled
     tracking_enabled = models.BooleanField(default=True)
     
+    # Wallet / ISK balance (master wallet, division 1)
+    wallet_balance = models.DecimalField(
+        max_digits=20,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Corporation master wallet balance in ISK",
+    )
+
     # Last sync times
     last_sync = models.DateTimeField(null=True, blank=True)
     last_update = models.DateTimeField(auto_now=True)

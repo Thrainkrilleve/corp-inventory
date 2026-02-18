@@ -232,6 +232,37 @@ class CorpInventoryManager:
             return None
 
 
+    @staticmethod
+    def get_corporation_wallets(token: Token, corporation_id: int) -> List[Dict]:
+        """
+        Fetch corporation wallet balances.
+
+        Requires scope: esi-wallet.read_corporation_wallets.v1
+
+        Args:
+            token: ESI token with required scopes
+            corporation_id: Corporation ID
+
+        Returns:
+            List of wallet dicts, each with 'division' (1-7) and 'balance' (float)
+        """
+        try:
+            client = esi.client
+            wallets = client.Wallet.get_corporations_corporation_id_wallets(
+                corporation_id=corporation_id,
+                token=token.valid_access_token()
+            ).results()
+            logger.info(
+                f"Retrieved {len(wallets)} wallet divisions for corporation {corporation_id}"
+            )
+            return wallets
+        except Exception as e:
+            logger.error(
+                f"Error fetching wallets for corporation {corporation_id}: {e}"
+            )
+            return []
+
+
 class PriceManager:
     """
     Manages market price lookups for valuation

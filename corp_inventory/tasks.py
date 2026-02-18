@@ -84,7 +84,23 @@ def sync_corporation_hangar(corporation_id: int):
         # Process assets and detect changes
         with transaction.atomic():
             items_count = process_assets(corporation, assets, market_prices, token)
-        
+
+        # Sync corp wallet balance (master wallet = division 1)
+        try:
+            wallets = CorpInventoryManager.get_corporation_wallets(token, corporation_id)
+            if wallets:
+                # Division 1 is the master wallet
+                master = next((w for w in wallets if w.get("division") == 1), wallets[0])
+                corporation.wallet_balance = Decimal(str(master.get("balance", 0)))
+                logger.info(
+                    f"Wallet balance for {corporation.corporation_name}: "
+                    f"{corporation.wallet_balance:,.2f} ISK"
+                )
+        except Exception as wallet_err:
+            logger.warning(
+                f"Could not sync wallet for {corporation.corporation_name}: {wallet_err}"
+            )
+
         # Update last sync time
         corporation.last_sync = timezone.now()
         corporation.save()
@@ -173,6 +189,38 @@ def sync_divisions(corporation: Corporation, token: Token):
         logger.error(f"Error syncing divisions for {corporation.corporation_name}: {e}")
 
 
+def resolve_station_id(asset_id: int, asset_map: dict) -> int:
+    """
+    Walk up the asset parent chain to find the real station/structure ID.
+
+    EVE asset hierarchy:
+      Station/Structure  (NPC station id < 64,000,000 OR player structure >= 1,000,000,000,000)
+        └─ Corp Office   (location_flag=OfficeFolder, location_id=station_id)
+             └─ Hangar   (location_flag=CorpSAG1-7, location_id=office item_id)
+                  └─ Container / Item
+
+    Args:
+        asset_id: The item_id whose real location we want to resolve.
+        asset_map: Dict of {item_id: asset_dict} for the full asset list.
+
+    Returns:
+        The resolved station or structure ID, or the original asset_id if we
+        cannot resolve it (fallback – prevents silent data loss).
+    """
+    visited = set()
+    current_id = asset_id
+
+    while current_id in asset_map:
+        if current_id in visited:
+            logger.warning(f"Cycle detected walking asset tree from {asset_id}")
+            break
+        visited.add(current_id)
+        parent = asset_map[current_id]
+        current_id = parent["location_id"]
+
+    return current_id
+
+
 def process_assets(
     corporation: Corporation,
     assets: list,
@@ -188,6 +236,10 @@ def process_assets(
         market_prices: Dictionary of market prices
         token: ESI token
     """
+    # Build a lookup map for the full asset list so we can walk the parent chain.
+    # Keys are item_id (int).  ESI may return them as int or str – normalise.
+    asset_map = {int(a["item_id"]): a for a in assets}
+
     # Filter for hangar items only (location_flag starts with 'CorpSAG')
     hangar_assets = [
         asset for asset in assets
@@ -201,11 +253,21 @@ def process_assets(
     locations_to_fetch = set()
     types_to_fetch = set()
     
-    # First pass: collect IDs we need to fetch
+    # First pass: resolve the real station/structure for each hangar asset and
+    # collect all unique location IDs that need to be fetched.
+    asset_resolved_location: dict = {}  # item_id -> resolved station/structure id
     for asset in hangar_assets:
-        locations_to_fetch.add(asset["location_id"])
+        item_id = int(asset["item_id"])
+        station_id = resolve_station_id(item_id, asset_map)
+        asset_resolved_location[item_id] = station_id
+        locations_to_fetch.add(station_id)
         types_to_fetch.add(asset["type_id"])
     
+    logger.info(
+        f"Resolved {len(hangar_assets)} hangar assets to "
+        f"{len(locations_to_fetch)} unique station(s)/structure(s): {locations_to_fetch}"
+    )
+
     # Fetch and cache location data
     location_cache = {}
     for loc_id in locations_to_fetch:
@@ -228,15 +290,20 @@ def process_assets(
     
     # Process each asset
     for asset in hangar_assets:
-        item_id = asset["item_id"]
+        item_id = int(asset["item_id"])
         type_id = asset["type_id"]
         quantity = asset.get("quantity", 1)
         location_id = asset["location_id"]
         
-        # Get location
-        location = location_cache.get(location_id)
+        # Get location – use the resolved station/structure id, not the raw
+        # location_id from ESI (which for CorpSAG items points to the office item).
+        resolved_loc_id = asset_resolved_location.get(item_id, location_id)
+        location = location_cache.get(resolved_loc_id)
         if not location:
-            logger.warning(f"Skipping asset {item_id} - no location data")
+            logger.warning(
+                f"Skipping asset {item_id} – no location data for "
+                f"resolved_id={resolved_loc_id} (raw location_id={location_id})"
+            )
             continue
         
         # Get type name
