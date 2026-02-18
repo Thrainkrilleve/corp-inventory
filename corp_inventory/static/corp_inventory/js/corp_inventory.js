@@ -61,49 +61,47 @@
         },
 
         /**
-         * Initialize filter functionality
+         * Initialize filter functionality.
+         *
+         * Hangar page: dropdowns submit instantly; search box submits after the
+         * user stops typing for 350 ms (debounced) so every keystroke doesn't
+         * fire a full page reload.  A spinner indicates a pending submission.
          */
         initFilters: function() {
-            // Search functionality
-            $('#item-search').on('keyup', function() {
-                var value = $(this).val().toLowerCase();
-                $('.hangar-table tbody tr').filter(function() {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-                });
+            var $form     = $('#hangar-filter-form');
+            var $search   = $('#hangar-search');
+            var $spinner  = $('#hangar-search-spinner');
+
+            if (!$form.length) return;   // not on hangar page
+
+            // Dropdowns — submit immediately on change
+            $form.find('select').on('change', function() {
+                $form.submit();
             });
 
-            // Division filter
-            $('#division-filter').on('change', function() {
-                var division = $(this).val();
-                if (division === '') {
-                    $('.hangar-table tbody tr').show();
-                } else {
-                    $('.hangar-table tbody tr').each(function() {
-                        var rowDivision = $(this).data('division');
-                        $(this).toggle(rowDivision == division);
-                    });
+            // Search box — debounce 350 ms then submit
+            var searchTimer = null;
+            $search.on('input', function() {
+                clearTimeout(searchTimer);
+                var val = $(this).val();
+
+                // Show spinner only when there's actually something to search
+                if (val.length > 0 || $search.data('had-value')) {
+                    $spinner.show();
                 }
+                $search.data('had-value', val.length > 0);
+
+                searchTimer = setTimeout(function() {
+                    $form.submit();
+                }, 350);
             });
 
-            // Location filter
-            $('#location-filter').on('change', function() {
-                var location = $(this).val();
-                if (location === '') {
-                    $('.hangar-table tbody tr').show();
-                } else {
-                    $('.hangar-table tbody tr').each(function() {
-                        var rowLocation = $(this).data('location');
-                        $(this).toggle(rowLocation == location);
-                    });
+            // Hide spinner if user hits Enter manually (form submits natively)
+            $search.on('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    clearTimeout(searchTimer);
+                    $spinner.hide();
                 }
-            });
-
-            // Clear filters
-            $('#clear-filters').on('click', function() {
-                $('#item-search').val('');
-                $('#division-filter').val('');
-                $('#location-filter').val('');
-                $('.hangar-table tbody tr').show();
             });
         },
 

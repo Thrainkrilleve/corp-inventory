@@ -346,3 +346,80 @@ class AlertRule(models.Model):
     
     def __str__(self):
         return f"{self.corporation.corporation_name} - {self.name}"
+
+
+class ContainerLog(models.Model):
+    """
+    Logs ESI corporation container access events.
+    Scope: esi-corporations.read_container_logs.v1
+    Provides character attribution for add/take actions.
+    """
+    ACTION_CHOICES = (
+        ("add", "Added"),
+        ("assemble", "Assembled"),
+        ("configure", "Configured"),
+        ("enter_password", "Entered Password"),
+        ("lock", "Locked"),
+        ("move", "Moved"),
+        ("repackage", "Repackaged"),
+        ("set_name", "Set Name"),
+        ("set_password", "Set Password"),
+        ("take", "Took"),
+        ("unlock", "Unlocked"),
+    )
+
+    corporation = models.ForeignKey(
+        Corporation,
+        on_delete=models.CASCADE,
+        related_name="container_logs",
+    )
+
+    # Who did it
+    character_id = models.IntegerField(db_index=True)
+    character_name = models.CharField(max_length=254, blank=True, default="")
+
+    # What action
+    action = models.CharField(max_length=30, choices=ACTION_CHOICES, db_index=True)
+
+    # Item involved (what was added/taken)
+    type_id = models.IntegerField(null=True, blank=True, db_index=True)
+    type_name = models.CharField(max_length=254, blank=True, default="")
+    quantity = models.IntegerField(null=True, blank=True)
+
+    # The container it happened in
+    container_id = models.BigIntegerField(db_index=True)
+    container_type_id = models.IntegerField(null=True, blank=True)
+    container_type_name = models.CharField(max_length=254, blank=True, default="")
+
+    # Location
+    location_id = models.BigIntegerField(null=True, blank=True)
+    location_flag = models.CharField(max_length=100, blank=True, default="")
+
+    # Timestamp from ESI
+    logged_at = models.DateTimeField(db_index=True)
+
+    class Meta:
+        verbose_name = "Container Log"
+        verbose_name_plural = "Container Logs"
+        ordering = ["-logged_at"]
+        # ESI returns the same events repeatedly; deduplicate on these fields
+        unique_together = (
+            "corporation", "character_id", "container_id",
+            "action", "type_id", "quantity", "logged_at",
+        )
+        indexes = [
+            models.Index(
+                fields=["corporation", "-logged_at"],
+                name="corp_inv_clog_corp_idx",
+            ),
+            models.Index(
+                fields=["character_id", "-logged_at"],
+                name="corp_inv_clog_char_idx",
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.character_name} {self.action} "
+            f"{self.type_name} x{self.quantity} @ {self.logged_at:%Y-%m-%d %H:%M}"
+        )

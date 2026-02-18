@@ -49,11 +49,14 @@
     
 <!-- Filters -->
 <div class="filter-bar">
-        <form method="get" class="form-inline">
+        <form method="get" id="hangar-filter-form" class="form-inline">
             <div class="form-group">
                 <label for="search">Search:</label>
-                <input type="text" name="search" id="search" class="form-control" 
-                       value="{{ search_query }}" placeholder="Item name...">
+                <input type="text" name="search" id="hangar-search" class="form-control" 
+                       value="{{ search_query }}" placeholder="Item name..." autocomplete="off">
+                <span id="hangar-search-spinner" style="display:none; margin-left:6px;">
+                    <i class="fas fa-circle-notch fa-spin text-muted"></i>
+                </span>
             </div>
             
             <div class="form-group">
@@ -81,10 +84,6 @@
                     {% endfor %}
                 </select>
             </div>
-            
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-filter"></i> Filter
-            </button>
             
             <a href="{% url 'corp_inventory:corporation_hangar' corporation.corporation_id %}" 
                class="btn btn-default">

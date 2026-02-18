@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "allianceauth-corp-inventory"
-version = "0.1.16"
+version = "0.1.17"
 description = "Alliance Auth app for tracking corporation hangar inventory and transactions"
 readme = "README.md"
 authors = [
