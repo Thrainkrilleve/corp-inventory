@@ -45,26 +45,19 @@ class Migration(migrations.Migration):
                 "verbose_name": "Container Log",
                 "verbose_name_plural": "Container Logs",
                 "ordering": ["-logged_at"],
-            },
-        ),
-        migrations.AddIndex(
-            model_name="containerlog",
-            index=models.Index(
-                fields=["corporation", "-logged_at"],
-                name="corp_inv_clog_corp_idx",
-            ),
-        ),
-        migrations.AddIndex(
-            model_name="containerlog",
-            index=models.Index(
-                fields=["character_id", "-logged_at"],
-                name="corp_inv_clog_char_idx",
-            ),
-        ),
-        migrations.AlterUniqueTogether(
-            name="containerlog",
-            unique_together={
-                ("corporation", "character_id", "container_id", "action", "type_id", "quantity", "logged_at")
+                "unique_together": {
+                    ("corporation", "character_id", "container_id", "action", "type_id", "quantity", "logged_at")
+                },
+                "indexes": [
+                    models.Index(
+                        fields=["corporation", "-logged_at"],
+                        name="corp_inv_clog_corp_idx",
+                    ),
+                    models.Index(
+                        fields=["character_id", "-logged_at"],
+                        name="corp_inv_clog_char_idx",
+                    ),
+                ],
             },
         ),
     ]
