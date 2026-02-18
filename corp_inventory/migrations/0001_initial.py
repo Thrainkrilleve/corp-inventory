@@ -163,26 +163,26 @@ class Migration(migrations.Migration):
         # Add indexes
         migrations.AddIndex(
             model_name='hangaritem',
-            index=models.Index(fields=['corporation', 'is_active']),
+            index=models.Index(fields=['corporation', 'is_active'], name='corp_inv_corp_active_idx'),
         ),
         migrations.AddIndex(
             model_name='hangaritem',
-            index=models.Index(fields=['type_id', 'is_active']),
+            index=models.Index(fields=['type_id', 'is_active'], name='corp_inv_type_active_idx'),
         ),
         migrations.AddIndex(
             model_name='hangartransaction',
-            index=models.Index(fields=['corporation', '-detected_at']),
+            index=models.Index(fields=['corporation', '-detected_at'], name='corp_inv_corp_detect_idx'),
         ),
         migrations.AddIndex(
             model_name='hangartransaction',
-            index=models.Index(fields=['type_id', '-detected_at']),
+            index=models.Index(fields=['type_id', '-detected_at'], name='corp_inv_type_detect_idx'),
         ),
         migrations.AddIndex(
             model_name='hangartransaction',
-            index=models.Index(fields=['character_id', '-detected_at']),
+            index=models.Index(fields=['character_id', '-detected_at'], name='corp_inv_char_detect_idx'),
         ),
         migrations.AddIndex(
             model_name='hangarsnapshot',
-            index=models.Index(fields=['corporation', '-snapshot_time']),
+            index=models.Index(fields=['corporation', '-snapshot_time'], name='corp_inv_corp_snap_idx'),
         ),
     ]
