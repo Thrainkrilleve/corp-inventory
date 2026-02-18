@@ -56,9 +56,14 @@
         // Initialize tooltips
         $('[data-toggle="tooltip"]').tooltip();
         
-        // Format ISK values
+        // Format ISK values — skip elements already formatted by Python (contain B/M/T/K or commas)
         $('.isk-value').each(function() {
-            var value = parseFloat($(this).text());
+            var text = $(this).text().trim();
+            // If already contains abbreviation letters or thousands commas, leave it alone
+            if (/[BMTKbmtk,]/.test(text)) return;
+            // Strip trailing " ISK" label if present, then parse
+            var numeric = text.replace(/\s*ISK\s*$/i, '').trim();
+            var value = parseFloat(numeric);
             if (!isNaN(value)) {
                 $(this).text(formatISK(value));
             }

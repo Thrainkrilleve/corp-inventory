@@ -1,6 +1,6 @@
 """Initialize the app"""
 
-__version__ = "0.1.13"
+__version__ = "0.1.20"
 __title__ = "Corp Inventory"
 __package_name__ = "allianceauth-corp-inventory"
 __app_name__ = "corp_inventory"

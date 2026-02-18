@@ -30,34 +30,36 @@ from .tasks import sync_corporation_hangar
 logger = logging.getLogger(__name__)
 
 
+def isk_abbrev(value):
+    """Return a human-readable ISK string like 6.90B or 248.43M."""
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        return "0"
+    if v >= 1_000_000_000_000:
+        return f"{v / 1_000_000_000_000:.2f}T"
+    if v >= 1_000_000_000:
+        return f"{v / 1_000_000_000:.2f}B"
+    if v >= 1_000_000:
+        return f"{v / 1_000_000:.2f}M"
+    return f"{v:,.0f}"
+
+
+def isk_full(value):
+    """Return comma-formatted ISK string like 2,484,327,454."""
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        return "0"
+    return f"{v:,.0f}"
+
+
 @login_required
 @permission_required("corp_inventory.basic_access", raise_exception=True)
 def index(request):
     """
     Main dashboard view showing overview of tracked corporations
     """
-
-    def isk_abbrev(value):
-        """Return a human-readable ISK string like 6.90B or 248.43M."""
-        try:
-            v = float(value)
-        except (TypeError, ValueError):
-            return "0"
-        if v >= 1_000_000_000_000:
-            return f"{v / 1_000_000_000_000:.2f}T"
-        if v >= 1_000_000_000:
-            return f"{v / 1_000_000_000:.2f}B"
-        if v >= 1_000_000:
-            return f"{v / 1_000_000:.2f}M"
-        return f"{v:,.0f}"
-
-    def isk_full(value):
-        """Return comma-formatted ISK string like 2,484,327,454."""
-        try:
-            v = float(value)
-        except (TypeError, ValueError):
-            return "0"
-        return f"{v:,.0f}"
 
     corporations = Corporation.objects.filter(tracking_enabled=True)
 
@@ -464,7 +466,9 @@ def manage_corporations(request):
         return redirect('corp_inventory:manage_corporations')
     
     # GET request - show all corporations
-    corporations = Corporation.objects.all().order_by('-tracking_enabled', 'corporation_name')
+    corporations = list(Corporation.objects.all().order_by('-tracking_enabled', 'corporation_name'))
+    for corp in corporations:
+        corp.wallet_display = isk_full(corp.wallet_balance) if corp.wallet_balance is not None else None
     
     # Determine ESI token URL - try user setting first, then auto-detect, then fallback
     from django.conf import settings

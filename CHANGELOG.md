@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.20] - 2026-02-18
+
+### Fixed
+- Wallet and ISK totals on dashboard displaying as `6.00 ISK` / `6.90 ISK`: base.html jQuery `.isk-value` handler called `parseFloat()` on already-formatted Python strings (`"6.90B ISK"` → `6.9`; `"6,900,450,319 ISK"` → `6` due to comma). Fix: skip elements whose text already contains `B/M/T/K` or commas; strip trailing ` ISK` suffix before parsing raw numeric elements
+- `__init__.py` version not bumped in sync with `pyproject.toml`
+- Manage Corporations page: wallet balance shown as raw decimal (e.g. `2489682759.95 ISK`) with no comma separators; promoted `isk_abbrev()`/`isk_full()` helpers to module level and annotated corp objects with `wallet_display` in the view
+
 ## [0.1.19] - 2026-02-18
 
 ### Fixed
