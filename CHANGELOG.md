@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-02-17
+
+### Fixed
+- Use `authentication:token_management` URL for ESI token management in Alliance Auth
+
 ## [0.1.6] - 2026-02-17
 
 ### Fixed
