@@ -1,215 +1,138 @@
-/* Corp Inventory Custom Styles */
-/* Theme-aware styling - works with both light and dark themes */
+﻿/* ============================================================
+   Corp Inventory - Custom Styles
+   Inherits Bootstrap 3 / Alliance Auth theme.
+   No hard-coded dark/light palette - let the AA theme handle it.
+   ============================================================ */
 
-/* Initialize CSS variables - these should be overridden by Alliance Auth's theme system */
-:root {
-    --ci-primary: #0d6efd;
-    --ci-success: #198754;
-    --ci-danger: #dc3545;
-    --ci-warning: #ffc107;
-    --ci-bg-body: #fff;
-    --ci-bg-secondary: #f8f9fa;
-    --ci-text-body: #212529;
-    --ci-text-muted: #6c757d;
-    --ci-border: #dee2e6;
-}
-
-/* Dark theme support */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --ci-primary: #0d6efd;
-        --ci-success: #198754;
-        --ci-danger: #dc3545;
-        --ci-warning: #ffc107;
-        --ci-bg-body: #212529;
-        --ci-bg-secondary: #343a40;
-        --ci-text-body: #f8f9fa;
-        --ci-text-muted: #adb5bd;
-        --ci-border: #495057;
-    }
-}
-
-/* Support for explicit dark theme class (aa-gdpr style) */
-[data-bs-theme="dark"],
-.dark-theme {
-    --ci-primary: #0d6efd;
-    --ci-success: #198754;
-    --ci-danger: #dc3545;
-    --ci-warning: #ffc107;
-    --ci-bg-body: #212529;
-    --ci-bg-secondary: #343a40;
-    --ci-text-body: #f8f9fa;
-    --ci-text-muted: #adb5bd;
-    --ci-border: #495057;
-}
-
-/* Support for explicit light theme class */
-[data-bs-theme="light"],
-.light-theme {
-    --ci-primary: #0d6efd;
-    --ci-success: #198754;
-    --ci-danger: #dc3545;
-    --ci-warning: #ffc107;
-    --ci-bg-body: #fff;
-    --ci-bg-secondary: #f8f9fa;
-    --ci-text-body: #212529;
-    --ci-text-muted: #6c757d;
-    --ci-border: #dee2e6;
-}
+/* ---- Layout ---- */
 
 .corp-inventory-wrapper {
-    padding: 20px 0;
+    padding: 0;
 }
 
-/* Dashboard Cards */
+/* Top nav bar above page content */
+.ci-navbar {
+    padding: 10px 15px 0 15px;
+    margin-bottom: 10px;
+}
+
+/* Full-width content area */
+.ci-content {
+    padding: 0 15px 20px 15px;
+}
+
+/* ---- Stat Cards ---- */
+
 .stat-card {
-    background: var(--ci-bg-body);
-    color: var(--ci-text-body);
     border-radius: 4px;
     padding: 20px;
     margin-bottom: 20px;
-    border: 1px solid var(--ci-border);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-    transition: box-shadow 0.3s ease;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    transition: box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 3px 8px rgba(0,0,0,.12);
 }
 
 .stat-card h3 {
     margin-top: 0;
-    color: var(--ci-text-body);
-    font-size: 18px;
-    border-bottom: 2px solid var(--ci-primary);
-    padding-bottom: 10px;
-    margin-bottom: 15px;
+    font-size: 17px;
+    border-bottom: 2px solid #337ab7;
+    padding-bottom: 8px;
+    margin-bottom: 14px;
 }
 
 .stat-number {
-    font-size: 32px;
-    font-weight: bold;
-    color: var(--ci-primary);
+    font-size: 30px;
+    font-weight: 700;
+    color: #337ab7;
     line-height: 1.2;
 }
 
 .stat-label {
-    color: var(--ci-text-muted);
-    font-size: 14px;
+    font-size: 12px;
     text-transform: uppercase;
-    margin-top: 5px;
+    color: #777;
+    margin-top: 4px;
+    letter-spacing: 0.03em;
 }
 
 .isk-value {
-    color: var(--ci-success);
-    font-weight: bold;
+    color: #3c763d;
+    font-weight: 600;
 }
 
-/* Transaction Types */
-.transaction-add {
-    color: var(--ci-success);
-}
+/* ---- Transaction labels ---- */
 
-.transaction-remove {
-    color: var(--ci-danger);
-}
+.transaction-add    { color: #3c763d; }
+.transaction-remove { color: #a94442; }
+.transaction-change { color: #8a6d3b; }
 
-.transaction-change {
-    color: var(--ci-warning);
-}
+/* ---- Filter bar ---- */
 
-/* Filter Bar */
 .filter-bar {
-    background: var(--ci-bg-secondary);
-    color: var(--ci-text-body);
-    padding: 15px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
     border-radius: 4px;
+    padding: 12px 15px;
     margin-bottom: 20px;
-    border: 1px solid var(--ci-border);
 }
 
 .filter-bar .form-group {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    margin-right: 10px;
 }
 
-.filter-bar .form-group:last-child {
-    margin-bottom: 0;
-}
-
-/* Tables */
-.table-responsive {
-    margin-top: 20px;
-}
-
-.hangar-table td, .hangar-table th {
-    vertical-align: middle !important;
-    color: var(--ci-text-body);
-}
+/* ---- Tables ---- */
 
 .item-icon {
     width: 32px;
     height: 32px;
-    margin-right: 10px;
+    margin-right: 8px;
+    vertical-align: middle;
 }
 
-/* Sync Status */
-.sync-status {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 3px;
-    font-size: 12px;
+.item-img {
+    width: 48px;
+    height: 48px;
+    margin-right: 12px;
+    vertical-align: middle;
 }
 
-.sync-status.syncing {
-    background: var(--ci-warning);
-    color: white;
-}
+/* ---- Sync status ---- */
 
-.sync-status.synced {
-    background: var(--ci-success);
-    color: white;
-}
+.sync-status.recent { color: #3c763d; }
+.sync-status.old    { color: #8a6d3b; }
 
-.sync-status.error {
-    background: var(--ci-danger);
-    color: white;
-}
+.sync-now-btn { margin-top: 8px; }
 
-/* Corporation Management */
+/* ---- Corporation cards ---- */
+
 .corp-card {
-    background: var(--ci-bg-body);
-    color: var(--ci-text-body);
-    border: 1px solid var(--ci-border);
+    border: 1px solid #ddd;
     border-radius: 4px;
     padding: 15px;
     margin-bottom: 15px;
-    transition: all 0.3s ease;
+    background-color: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .corp-card:hover {
-    border-color: var(--ci-primary);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-color: #337ab7;
+    box-shadow: 0 2px 6px rgba(0,0,0,.1);
 }
 
 .corp-card.inactive {
-    opacity: 0.6;
-    background: var(--ci-bg-secondary);
+    opacity: 0.65;
+    background-color: #f5f5f5;
 }
 
 .corp-card h4 {
     margin-top: 0;
-    color: var(--ci-primary);
-}
-
-.corp-card .ticker {
-    display: inline-block;
-    padding: 2px 8px;
-    background: var(--ci-primary);
-    color: white;
-    border-radius: 3px;
-    font-size: 12px;
-    font-weight: bold;
-    margin-left: 10px;
+    color: #337ab7;
 }
 
 .corp-actions {
@@ -217,211 +140,123 @@
 }
 
 .corp-actions .btn {
-    margin-right: 5px;
-    margin-bottom: 5px;
+    margin-right: 4px;
+    margin-bottom: 4px;
 }
 
-/* Add Corporation Form */
+.corp-logo {
+    max-width: 80px;
+    margin-left: auto;
+    display: block;
+}
+
+/* ---- Add Corporation form ---- */
+
 .add-corp-form {
-    background: var(--ci-bg-secondary);
-    color: var(--ci-text-body);
-    padding: 20px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
     border-radius: 4px;
-    margin-bottom: 30px;
-    border: 1px solid var(--ci-border);
+    padding: 20px;
+    margin-bottom: 24px;
 }
 
 .add-corp-form h3 {
     margin-top: 0;
-    color: var(--ci-text-body);
-    border-bottom: 2px solid var(--ci-primary);
-    padding-bottom: 10px;
-    margin-bottom: 20px;
+    border-bottom: 2px solid #337ab7;
+    padding-bottom: 8px;
+    margin-bottom: 18px;
 }
 
-.corp-form-note {
-    margin-top: 15px;
-    margin-bottom: 0;
-}
+.corp-form-note   { margin-top: 12px; margin-bottom: 0; }
+.corp-info-actions { margin-top: 12px; }
 
-.dashboard-action-btn {
-    margin-top: 0;
-}
+/* ---- Code/Log blocks ---- */
 
-/* Code and Log Blocks */
 .corp-inv-log {
     max-height: 400px;
     overflow-y: auto;
-    background: var(--ci-bg-secondary);
-    color: var(--ci-text-body);
-    padding: 10px;
-    border-radius: 4px;
     font-size: 12px;
-    border: 1px solid var(--ci-border);
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 
 .corp-inv-code {
-    background: var(--ci-bg-secondary);
-    color: var(--ci-text-body);
-    padding: 10px;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
     border-radius: 4px;
-    border: 1px solid var(--ci-border);
+    padding: 10px;
     font-family: 'Courier New', monospace;
+    font-size: 13px;
     overflow-x: auto;
+    white-space: pre;
 }
 
-.log-note {
-    margin-top: 10px;
+.code-section-label { margin-top: 10px; }
+
+/* ---- Item details ---- */
+
+dl.dl-horizontal dt { width: 140px; }
+dl.dl-horizontal dd { margin-left: 160px; }
+
+/* ---- Charts ---- */
+
+.chart-container {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    background-color: #fff;
 }
 
-.code-section-label {
-    margin-top: 10px;
-}
+/* ---- Empty state ---- */
 
-.sync-now-btn {
-    margin-top: 10px;
-}
-
-.item-divider {
-    margin-top: 10px;
-}
-
-.corp-info-actions {
-    margin-top: 15px;
-}
-
-.item-img {
-    vertical-align: middle;
-}
-
-.ticker-field {
-    max-width: 80px;
-    margin-left: auto;
-}
-
-@media (min-width: 768px) {
-    .dashboard-action-btn {
-        margin-top: 20px;
-    }
-}
-
-/* Loading Spinner */
-.loading-spinner {
+.no-data {
     text-align: center;
     padding: 40px;
+    color: #777;
 }
 
-.loading-spinner .fa-spin {
+.no-data i {
     font-size: 48px;
-    color: var(--ci-primary);
+    margin-bottom: 12px;
+    display: block;
 }
 
-/* Alerts and Messages */
-.alert-dismissible {
-    margin-bottom: 20px;
-}
-
-/* Item Details */
-.item-details {
-    background: var(--ci-bg-body);
-    color: var(--ci-text-body);
-    padding: 20px;
-    border-radius: 4px;
-    border: 1px solid var(--ci-border);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-}
-
-.item-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.item-header img {
-    width: 64px;
-    height: 64px;
-    margin-right: 20px;
-}
-
-.item-info {
-    margin-bottom: 30px;
-}
-
-.info-group {
-    margin-bottom: 15px;
-}
-
-.info-label {
-    font-weight: bold;
-    color: var(--ci-text-muted);
-    display: inline-block;
-    width: 150px;
-}
-
-.info-value {
-    color: var(--ci-text-body);
-}
-
-/* Statistics Charts */
-.chart-container {
-    background: var(--ci-bg-body);
-    color: var(--ci-text-body);
-    padding: 20px;
-    border-radius: 4px;
-    border: 1px solid var(--ci-border);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-    margin-bottom: 20px;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .stat-number {
-        font-size: 24px;
-    }
-    
-    .filter-bar {
-        padding: 10px;
-    }
-    
-    .corp-actions .btn {
-        display: block;
-        width: 100%;
-        margin-right: 0;
-    }
-    
-    .info-label {
-        display: block;
-        width: 100%;
-        margin-bottom: 5px;
-    }
-    
-    .dashboard-action-btn {
-        margin-top: 20px;
-    }
-}
-
-/* Utility Classes */
-.text-muted {
-    color: var(--ci-text-muted);
-}
+/* ---- Misc ---- */
 
 .badge-corp {
-    background: var(--ci-primary);
-    color: white;
-    padding: 3px 8px;
+    background-color: #337ab7;
+    color: #fff;
+    padding: 2px 7px;
     border-radius: 3px;
     font-size: 11px;
     font-weight: normal;
 }
 
-.no-data {
-    text-align: center;
-    padding: 40px;
-    color: var(--ci-text-muted);
-}
+.item-divider    { margin-top: 10px; }
+.log-note        { margin-top: 10px; }
 
-.no-data i {
-    font-size: 48px;
-    margin-bottom: 15px;
-    display: block;
+/* ---- Responsive ---- */
+
+@media (max-width: 768px) {
+    .ci-navbar  { padding: 8px 10px 0 10px; }
+    .stat-number { font-size: 22px; }
+    .filter-bar  { padding: 10px; }
+
+    .corp-actions .btn {
+        display: block;
+        width: 100%;
+        margin-right: 0;
+    }
+
+    dl.dl-horizontal dt,
+    dl.dl-horizontal dd {
+        float: none;
+        width: auto;
+        margin-left: 0;
+    }
 }

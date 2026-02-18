@@ -6,8 +6,29 @@
 
 {% block content %}
 <div class="corp-inventory-wrapper">
-    {% block corp_inventory_content %}
-    {% endblock %}
+
+    <!-- Global Nav Bar (top-left, consistent across all pages) -->
+    <div class="ci-navbar">
+        <div class="btn-group" role="group">
+            <a href="{% url 'corp_inventory:index' %}" class="btn btn-default btn-sm{% if request.resolver_match.url_name == 'index' %} active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            {% if perms.corp_inventory.manage_corporations %}
+            <a href="{% url 'corp_inventory:manage_corporations' %}" class="btn btn-default btn-sm{% if request.resolver_match.url_name == 'manage_corporations' %} active{% endif %}">
+                <i class="fas fa-building"></i> Manage Corps
+            </a>
+            <a href="{% url 'corp_inventory:logs' %}" class="btn btn-default btn-sm{% if request.resolver_match.url_name == 'logs' %} active{% endif %}">
+                <i class="fas fa-stethoscope"></i> Diagnostics
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container-fluid ci-content">
+        {% block corp_inventory_content %}
+        {% endblock %}
+    </div>
+
 </div>
 {% endblock %}
 

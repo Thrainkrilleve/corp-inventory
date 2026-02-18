@@ -3,26 +3,25 @@
 {% load humanize %}
 
 {% block corp_inventory_content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h1>
-                <i class="fas fa-map-marker-alt"></i>
-                {{ location.location_name }}
-            </h1>
-            <p class="lead">
-                {% if location.solar_system_name %}
-                    {{ location.solar_system_name }}
-                    {% if location.region_name %}
-                        - {{ location.region_name }}
-                    {% endif %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>
+            <i class="fas fa-map-marker-alt"></i>
+            {{ location.location_name }}
+        </h1>
+        <p class="lead">
+            {% if location.solar_system_name %}
+                {{ location.solar_system_name }}
+                {% if location.region_name %}
+                    - {{ location.region_name }}
                 {% endif %}
-            </p>
-        </div>
+            {% endif %}
+        </p>
     </div>
+</div>
     
-    <!-- Summary Stats -->
-    <div class="row">
+<!-- Summary Stats -->
+<div class="row">
         <div class="col-sm-4">
             <div class="stat-card">
                 <div class="stat-number">{{ total_items|intcomma }}</div>
@@ -44,9 +43,9 @@
         </div>
     </div>
     
-    <!-- Items by Corporation -->
-    <div class="row">
-        <div class="col-md-12">
+<!-- Items by Corporation -->
+<div class="row">
+    <div class="col-md-12">
             {% if corp_items %}
                 {% for corp_name, items in corp_items.items %}
                 <div class="stat-card">

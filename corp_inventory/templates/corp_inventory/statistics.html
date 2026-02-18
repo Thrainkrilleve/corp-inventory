@@ -3,19 +3,18 @@
 {% load humanize %}
 
 {% block corp_inventory_content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h1>
-                <i class="fas fa-chart-bar"></i>
-                {{ corporation.corporation_name }} Statistics
-            </h1>
-            <p class="lead">Analytics and insights for corporation hangar assets</p>
-        </div>
+<div class="row">
+    <div class="col-md-12">
+        <h1>
+            <i class="fas fa-chart-bar"></i>
+            {{ corporation.corporation_name }} Statistics
+        </h1>
+        <p class="lead">Analytics and insights for corporation hangar assets</p>
     </div>
+</div>
     
-    <!-- Transaction Summary -->
-    <div class="row">
+<!-- Transaction Summary -->
+<div class="row">
         <div class="col-md-12">
             <div class="stat-card">
                 <h3><i class="fas fa-chart-pie"></i> Transaction Summary (Last 30 Days)</h3>
@@ -32,8 +31,8 @@
         </div>
     </div>
     
-    <!-- Top Items by Value -->
-    <div class="row">
+<!-- Top Items by Value -->
+<div class="row">
         <div class="col-md-12">
             <div class="stat-card">
                 <h3><i class="fas fa-trophy"></i> Top 10 Items by Value</h3>
@@ -80,8 +79,8 @@
         </div>
     </div>
     
-    <!-- Active Alert Rules -->
-    <div class="row">
+<!-- Active Alert Rules -->
+<div class="row">
         <div class="col-md-12">
             <div class="stat-card">
                 <h3><i class="fas fa-bell"></i> Active Alert Rules</h3>
@@ -121,14 +120,14 @@
             </div>
         </div>
     </div>
-    
-    <div class="row">
-        <div class="col-md-12">
-            <a href="{% url 'corp_inventory:corporation_hangar' corporation.corporation_id %}" 
-               class="btn btn-default">
-                <i class="fas fa-arrow-left"></i> Back to Hangar
-            </a>
-        </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <a href="{% url 'corp_inventory:corporation_hangar' corporation.corporation_id %}" 
+           class="btn btn-default">
+            <i class="fas fa-arrow-left"></i> Back to Hangar
+        </a>
     </div>
 </div>
 {% endblock %}

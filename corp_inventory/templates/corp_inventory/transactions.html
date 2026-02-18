@@ -3,23 +3,22 @@
 {% load humanize %}
 
 {% block corp_inventory_content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h1>
-                <i class="fas fa-exchange-alt"></i>
-                {% if corporation %}
-                    {{ corporation.corporation_name }} Transaction Log
-                {% else %}
-                    Transaction Log
-                {% endif %}
-            </h1>
-            <p class="lead">Track all hangar additions, removals, and changes</p>
-        </div>
+<div class="row">
+    <div class="col-md-12">
+        <h1>
+            <i class="fas fa-exchange-alt"></i>
+            {% if corporation %}
+                {{ corporation.corporation_name }} Transaction Log
+            {% else %}
+                Transaction Log
+            {% endif %}
+        </h1>
+        <p class="lead">Track all hangar additions, removals, and changes</p>
     </div>
+</div>
     
-    <!-- Filters -->
-    <div class="filter-bar">
+<!-- Filters -->
+<div class="filter-bar">
         <form method="get" class="form-inline">
             {% if not corporation %}
             <div class="form-group">
@@ -85,10 +84,10 @@
         </form>
     </div>
     
-    <!-- Transactions Table -->
-    <div class="row">
-        <div class="col-md-12">
-            <div class="stat-card">
+<!-- Transactions Table -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="stat-card">
                 <h3><i class="fas fa-list"></i> Recent Transactions</h3>
                 
                 {% if transactions %}
@@ -193,5 +192,4 @@
             </div>
         </div>
     </div>
-</div>
 {% endblock %}

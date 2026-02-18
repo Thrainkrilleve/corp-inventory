@@ -3,22 +3,21 @@
 {% load humanize %}
 
 {% block corp_inventory_content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h1>
-                <img src="https://images.evetech.net/types/{{ item.type_id }}/icon?size=64" 
-                     alt="{{ item.type_name }}" 
-                     class="item-img"
-                     onerror="this.style.display='none'">
-                {{ item.type_name }}
-            </h1>
-            <p class="lead">Item Details and Transaction History</p>
-        </div>
+<div class="row">
+    <div class="col-md-12">
+        <h1>
+            <img src="https://images.evetech.net/types/{{ item.type_id }}/icon?size=64" 
+                 alt="{{ item.type_name }}" 
+                 class="item-img"
+                 onerror="this.style.display='none'">
+            {{ item.type_name }}
+        </h1>
+        <p class="lead">Item Details and Transaction History</p>
     </div>
+</div>
     
-    <!-- Item Details -->
-    <div class="row">
+<!-- Item Details -->
+<div class="row">
         <div class="col-md-6">
             <div class="stat-card">
                 <h3><i class="fas fa-info-circle"></i> Item Information</h3>
@@ -95,8 +94,8 @@
         </div>
     </div>
     
-    <!-- Transaction History -->
-    <div class="row">
+<!-- Transaction History -->
+<div class="row">
         <div class="col-md-12">
             <div class="stat-card">
                 <h3><i class="fas fa-history"></i> Transaction History</h3>
@@ -157,14 +156,13 @@
             </div>
         </div>
     </div>
-    
-    <div class="row">
-        <div class="col-md-12">
-            <a href="{% url 'corp_inventory:corporation_hangar' item.corporation.corporation_id %}" 
-               class="btn btn-default">
-                <i class="fas fa-arrow-left"></i> Back to Hangar
-            </a>
-        </div>
+
+<div class="row">
+    <div class="col-md-12">
+        <a href="{% url 'corp_inventory:corporation_hangar' item.corporation.corporation_id %}" 
+           class="btn btn-default">
+            <i class="fas fa-arrow-left"></i> Back to Hangar
+        </a>
     </div>
 </div>
 {% endblock %}

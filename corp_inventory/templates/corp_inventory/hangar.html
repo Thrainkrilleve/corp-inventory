@@ -3,19 +3,18 @@
 {% load humanize %}
 
 {% block corp_inventory_content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h1>
-                <i class="fas fa-boxes"></i>
-                {{ corporation.corporation_name }} Hangar
-            </h1>
-            <p class="lead">View all items in corporation hangars</p>
-        </div>
+<div class="row">
+    <div class="col-md-12">
+        <h1>
+            <i class="fas fa-boxes"></i>
+            {{ corporation.corporation_name }} Hangar
+        </h1>
+        <p class="lead">View all items in corporation hangars</p>
     </div>
+</div>
     
-    <!-- Summary Stats -->
-    <div class="row">
+<!-- Summary Stats -->
+<div class="row">
         <div class="col-sm-4">
             <div class="stat-card">
                 <div class="stat-number">{{ total_items|intcomma }}</div>
@@ -48,8 +47,8 @@
         </div>
     </div>
     
-    <!-- Filters -->
-    <div class="filter-bar">
+<!-- Filters -->
+<div class="filter-bar">
         <form method="get" class="form-inline">
             <div class="form-group">
                 <label for="search">Search:</label>
@@ -94,10 +93,10 @@
         </form>
     </div>
     
-    <!-- Items Table -->
-    <div class="row">
-        <div class="col-md-12">
-            <div class="stat-card">
+<!-- Items Table -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="stat-card">
                 <h3><i class="fas fa-list"></i> Hangar Items</h3>
                 
                 {% if items %}
@@ -170,5 +169,4 @@
             </div>
         </div>
     </div>
-</div>
 {% endblock %}

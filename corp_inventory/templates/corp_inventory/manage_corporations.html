@@ -3,27 +3,15 @@
 {% load static %}
 
 {% block corp_inventory_content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h1><i class="fas fa-building"></i> Manage Corporations</h1>
-            <p class="lead">Add or remove corporations for hangar tracking</p>
-            <div class="btn-group" role="group">
-                <a href="{% url 'corp_inventory:index' %}" class="btn btn-default btn-sm">
-                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                </a>
-                <a href="{% url 'corp_inventory:manage_corporations' %}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-building"></i> Manage Corps
-                </a>
-                <a href="{% url 'corp_inventory:logs' %}" class="btn btn-default btn-sm">
-                    <i class="fas fa-stethoscope"></i> Diagnostics
-                </a>
-            </div>
-        </div>
+<div class="row">
+    <div class="col-md-12">
+        <h1><i class="fas fa-building"></i> Manage Corporations</h1>
+        <p class="lead">Add or remove corporations for hangar tracking</p>
     </div>
+</div>
 
-    <!-- Add Corporation Form -->
-    <div class="row">
+<!-- Add Corporation Form -->
+<div class="row">
         <div class="col-md-12">
             <div class="add-corp-form">
                 <h3><i class="fas fa-plus-circle"></i> Add New Corporation</h3>
@@ -80,10 +68,10 @@
         </div>
     </div>
 
-    <!-- Existing Corporations -->
-    <div class="row">
-        <div class="col-md-12">
-            <h3><i class="fas fa-list"></i> Tracked Corporations</h3>
+<!-- Existing Corporations -->
+<div class="row">
+    <div class="col-md-12">
+        <h3><i class="fas fa-list"></i> Tracked Corporations</h3>
             
             {% if not corporations %}
             <div class="no-data">
@@ -131,7 +119,7 @@
                                 <img 
                                     src="https://images.evetech.net/corporations/{{ corp.corporation_id }}/logo?size=128" 
                                     alt="{{ corp.corporation_name }}"
-                                    class="img-responsive ticker-field"
+                                    class="img-responsive corp-logo"
                                 >
                             </div>
                         </div>
@@ -185,5 +173,4 @@
             {% endif %}
         </div>
     </div>
-</div>
 {% endblock %}
