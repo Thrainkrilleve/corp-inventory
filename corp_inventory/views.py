@@ -395,7 +395,11 @@ def manage_corporations(request):
     # GET request - show all corporations
     corporations = Corporation.objects.all().order_by('-tracking_enabled', 'corporation_name')
     
-    esi_token_url = app_settings.CORPINVENTORY_ESI_TOKEN_URL
+    esi_token_url = getattr(
+        app_settings,
+        "CORPINVENTORY_ESI_TOKEN_URL",
+        "/auth/eveauth/",
+    )
     for url_name in ("eveonline:token_add", "eveonline:character_add"):
         try:
             esi_token_url = reverse(url_name)

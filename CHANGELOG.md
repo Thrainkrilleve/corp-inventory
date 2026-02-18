@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-02-17
+
+### Fixed
+- Avoid AttributeError when `CORPINVENTORY_ESI_TOKEN_URL` is missing during mixed-version installs
+
 ## [0.1.3] - 2026-02-17
 
 ### Fixed
@@ -80,7 +85,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Division filtering
 - Search functionality
 
-[Unreleased]: https://github.com/yourusername/allianceauth-corp-inventory/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/yourusername/allianceauth-corp-inventory/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/yourusername/allianceauth-corp-inventory/releases/tag/v0.1.4
 [0.1.3]: https://github.com/yourusername/allianceauth-corp-inventory/releases/tag/v0.1.3
 [0.1.2]: https://github.com/yourusername/allianceauth-corp-inventory/releases/tag/v0.1.2
 [0.1.1]: https://github.com/yourusername/allianceauth-corp-inventory/releases/tag/v0.1.1
