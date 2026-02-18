@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.12] - 2026-02-17
+
+### Fixed
+- After adding ESI token, auto-detect character's corporation, register it for tracking, and trigger an immediate sync
+
 ## [0.1.11] - 2026-02-17
 
 ### Changed

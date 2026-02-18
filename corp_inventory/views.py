@@ -355,12 +355,46 @@ def add_corp_token(request, token):
     """
     Redirect user through EVE SSO to add a corporation ESI token.
     The @token_required decorator handles the SSO flow automatically.
+    After getting the token, auto-detect and register the character's corporation.
     """
-    messages.success(
-        request,
-        f"ESI token added for {token.character_name}. "
-        f"If this character is a Director or CEO, corporation data will sync automatically."
-    )
+    from allianceauth.eveonline.models import EveCharacter
+    try:
+        char = EveCharacter.objects.get_character_by_id(token.character_id)
+        if char:
+            corp, created = Corporation.objects.get_or_create(
+                corporation_id=char.corporation_id,
+                defaults={
+                    'corporation_name': char.corporation_name,
+                    'ticker': char.corporation_ticker,
+                    'tracking_enabled': True,
+                }
+            )
+            # Trigger a sync for this corporation
+            sync_corporation_hangar.delay(char.corporation_id)
+            if created:
+                messages.success(
+                    request,
+                    f"ESI token added for {token.character_name} and corporation "
+                    f"{char.corporation_name} has been added for tracking. Sync initiated!"
+                )
+            else:
+                messages.success(
+                    request,
+                    f"ESI token added for {token.character_name}. "
+                    f"Sync initiated for {char.corporation_name}!"
+                )
+        else:
+            messages.success(
+                request,
+                f"ESI token added for {token.character_name}. "
+                f"Make sure the corporation is added to the tracking list."
+            )
+    except Exception as e:
+        logger.error(f"Error processing token for {token.character_name}: {e}")
+        messages.warning(
+            request,
+            f"ESI token added for {token.character_name}, but could not auto-detect corporation: {e}"
+        )
     return redirect('corp_inventory:manage_corporations')
 
 
