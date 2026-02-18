@@ -400,8 +400,7 @@ def manage_corporations(request):
     if hasattr(settings, 'CORPINVENTORY_ESI_TOKEN_URL'):
         esi_token_url = settings.CORPINVENTORY_ESI_TOKEN_URL
     else:
-        # Try to auto-detect the correct URL
-        esi_token_url = "/auth/eveauth/"  # fallback
+        esi_token_url = None
         for url_name in (
             "authentication:token_management",
             "authentication:add_character",
@@ -412,9 +411,13 @@ def manage_corporations(request):
         ):
             try:
                 esi_token_url = reverse(url_name)
+                logger.info(f"Auto-detected ESI token URL: {url_name} -> {esi_token_url}")
                 break
             except NoReverseMatch:
                 continue
+        if esi_token_url is None:
+            esi_token_url = "/auth/eveauth/"
+            logger.warning(f"Could not auto-detect ESI token URL, using fallback: {esi_token_url}")
 
     context = {
         'corporations': corporations,

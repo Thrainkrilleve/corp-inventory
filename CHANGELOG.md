@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+## [0.1.10] - 2026-02-17
+
+### Fixed
+- Commit template fix: use dynamic `{{ esi_token_url }}` in manage_corporations.html
+- Fix ESI token URL flow to only use fallback when all auto-detection attempts fail
+## [0.1.10] - 2026-02-17
+
+### Fixed
+- Fix hardcoded `/auth/eveauth/` URL in manage_corporations.html template to use dynamic `{{ esi_token_url }}`
 
 ## [0.1.9] - 2026-02-17
 
