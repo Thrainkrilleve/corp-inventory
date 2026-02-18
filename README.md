@@ -35,20 +35,10 @@ Track and monitor corporation hangar assets in EVE Online through Alliance Auth.
 - Django >= 4.0
 
 ### Step 1: Install from GitHub
-
-**Method 1: Via requirements.txt (Recommended for Production)**
-
-Add to your Alliance Auth `requirements.txt`:
-
-```txt
-# For latest stable release
-git+https://github.com/Thrainkrilleve/corp-inventory.git@main
-
-# Or pin to a specific version (replace v0.1.1 with desired version)
-git+https://github.com/Thrainkrilleve/corp-inventory.git@v0.1.1
+Install:
+```bash
+docker compose exec allianceauth_gunicorn bash
 ```
-
-Then install:
 
 ```bash
 pip install git+https://github.com/Thrainkrilleve/corp-inventory.git
@@ -64,7 +54,10 @@ INSTALLED_APPS = [
     'corp_inventory',
 ]
 ```
+```
+Add git+https://github.com/Thrainkrilleve/corp-inventory.git to requirements.txt
 
+```
 ### Step 3: Configure ESI Scopes
 
 The app requires the following ESI scopes:
