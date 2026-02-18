@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-02-17
+
+### Added
+- Comprehensive diagnostics page at `/corp-inventory/logs/` for troubleshooting
+- Token validation and character count display in logs page
+- Item and transaction count display in logs page
+- Recent log entries viewer (last 100 lines) in diagnostics page
+- Manual sync trigger instructions in diagnostics page
+
+### Changed
+- Enhanced `sync_corporation_hangar()` task to return status dictionary with status, message, and asset count
+- Improved logs page with detailed diagnostic information
+- Updated README with comprehensive installation, update, and troubleshooting guides
+
+### Fixed
+- Migration initial field names (division_id and division_name) to match model definitions
+- Missing ESI scope `esi-universe.read_structures.v1` added to operations
+
 ## [0.1.0] - 2026-02-17
 
 ### Added
