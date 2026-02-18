@@ -400,7 +400,12 @@ def manage_corporations(request):
         "CORPINVENTORY_ESI_TOKEN_URL",
         "/auth/eveauth/",
     )
-    for url_name in ("eveonline:token_add", "eveonline:character_add"):
+    for url_name in (
+        "esi:token_add",
+        "esi:character_add",
+        "eveonline:token_add",
+        "eveonline:character_add",
+    ):
         try:
             esi_token_url = reverse(url_name)
             break
