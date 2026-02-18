@@ -5,6 +5,7 @@ Views for Corp Inventory
 import logging
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, permission_required
+from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.db.models import Sum, Count, Q
 from django.http import JsonResponse
@@ -243,11 +244,15 @@ def item_details(request, item_id):
 
 
 @login_required
-@permission_required("corp_inventory.manage_tracking", raise_exception=True)
 def sync_corporation(request, corporation_id):
     """
     Manually trigger a sync for a corporation
     """
+    if not (
+        request.user.has_perm('corp_inventory.manage_corporations')
+        or request.user.has_perm('corp_inventory.manage_tracking')
+    ):
+        raise PermissionDenied
     corporation = get_object_or_404(Corporation, corporation_id=corporation_id)
     
     # Trigger sync task

@@ -64,6 +64,7 @@ class HangarDivision(models.Model):
     class Meta:
         verbose_name = "Hangar Division"
         verbose_name_plural = "Hangar Divisions"
+        default_permissions = ()
         unique_together = ("corporation", "division_id")
         ordering = ["corporation", "division_id"]
     
@@ -91,6 +92,7 @@ class Location(models.Model):
     class Meta:
         verbose_name = "Location"
         verbose_name_plural = "Locations"
+        default_permissions = ()
         ordering = ["location_name"]
     
     def __str__(self):
@@ -149,6 +151,7 @@ class HangarItem(models.Model):
     class Meta:
         verbose_name = "Hangar Item"
         verbose_name_plural = "Hangar Items"
+        default_permissions = ()
         ordering = ["-last_seen"]
         indexes = [
             models.Index(
@@ -231,6 +234,7 @@ class HangarTransaction(models.Model):
     class Meta:
         verbose_name = "Hangar Transaction"
         verbose_name_plural = "Hangar Transactions"
+        default_permissions = ()
         ordering = ["-detected_at"]
         indexes = [
             models.Index(
@@ -279,6 +283,7 @@ class HangarSnapshot(models.Model):
     class Meta:
         verbose_name = "Hangar Snapshot"
         verbose_name_plural = "Hangar Snapshots"
+        default_permissions = ()
         ordering = ["-snapshot_time"]
         indexes = [
             models.Index(
@@ -342,6 +347,7 @@ class AlertRule(models.Model):
     class Meta:
         verbose_name = "Alert Rule"
         verbose_name_plural = "Alert Rules"
+        default_permissions = ()
         ordering = ["corporation", "name"]
     
     def __str__(self):
@@ -401,6 +407,7 @@ class ContainerLog(models.Model):
     class Meta:
         verbose_name = "Container Log"
         verbose_name_plural = "Container Logs"
+        default_permissions = ()
         ordering = ["-logged_at"]
         # ESI returns the same events repeatedly; deduplicate on these fields
         unique_together = (

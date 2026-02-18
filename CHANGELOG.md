@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.21] - 2026-02-18
+
+### Fixed
+- `sync_corporation` view was gated by `manage_tracking` only; users with `manage_corporations` who click Sync Now received a 403. Now accepts either `manage_corporations` **or** `manage_tracking`
+- All 6 non-Corporation models lacked `default_permissions = ()`, causing Django to auto-create 28 unused CRUD permissions (`add_hangardivision`, `view_location`, etc.) that cluttered the AA permission picker
+- Migration 0005: data migration removes those 28 spurious permissions from existing installs
+
 ## [0.1.20] - 2026-02-18
 
 ### Fixed
