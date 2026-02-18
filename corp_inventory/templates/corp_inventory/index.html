@@ -58,37 +58,16 @@
                         <div class="stat-label">Items</div>
                     </div>
                     <div class="col-xs-6">
-                        <div class="stat-number isk-value">
-                            {% with val=stat.total_value %}
-                            {% if val >= 1000000000000 %}
-                                {{ val|floatformat:0|slice:"-12" }}T
-                            {% elif val >= 1000000000 %}
-                                {{ val|floatformat:0|slice:"-9" }}B
-                            {% elif val >= 1000000 %}
-                                {{ val|floatformat:0|slice:"-6" }}M
-                            {% else %}
-                                {{ val|floatformat:0|intcomma }}
-                            {% endif %}
-                            {% endwith %}
-                        </div>
-                        <div class="stat-label">Total Value (ISK)</div>
+                        <div class="stat-number isk-value">{{ stat.total_value_display }} ISK</div>
+                        <div class="stat-label">Total Value</div>
                     </div>
                 </div>
 
                 <!-- Wallet balance -->
-                {% if stat.corporation.wallet_balance %}
+                {% if stat.wallet_display %}
                 <div class="wallet-balance-row">
                     <span class="wallet-balance-label"><i class="fas fa-coins"></i> Corp Wallet:</span>
-                    <span class="isk-value" style="font-size:14px;font-weight:600;">
-                        {% with wb=stat.corporation.wallet_balance %}
-                        {% if wb >= 1000000000000 %}
-                            {{ wb|floatformat:2 }}
-                        {% else %}
-                            {{ wb|intcomma|floatformat:0 }}
-                        {% endif %}
-                        {% endwith %}
-                        ISK
-                    </span>
+                    <span class="isk-value" style="font-size:14px;font-weight:600;">{{ stat.wallet_display }} ISK</span>
                 </div>
                 {% endif %}
 

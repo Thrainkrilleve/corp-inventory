@@ -36,43 +36,64 @@ def index(request):
     """
     Main dashboard view showing overview of tracked corporations
     """
-    # Get corporations the user has access to
-    # For now, showing all tracked corporations
-    # You may want to filter based on user's corporation membership
+
+    def isk_abbrev(value):
+        """Return a human-readable ISK string like 6.90B or 248.43M."""
+        try:
+            v = float(value)
+        except (TypeError, ValueError):
+            return "0"
+        if v >= 1_000_000_000_000:
+            return f"{v / 1_000_000_000_000:.2f}T"
+        if v >= 1_000_000_000:
+            return f"{v / 1_000_000_000:.2f}B"
+        if v >= 1_000_000:
+            return f"{v / 1_000_000:.2f}M"
+        return f"{v:,.0f}"
+
+    def isk_full(value):
+        """Return comma-formatted ISK string like 2,484,327,454."""
+        try:
+            v = float(value)
+        except (TypeError, ValueError):
+            return "0"
+        return f"{v:,.0f}"
+
     corporations = Corporation.objects.filter(tracking_enabled=True)
-    
-    # Get statistics for each corporation
+
     corp_stats = []
     for corp in corporations:
         active_items = HangarItem.objects.filter(
             corporation=corp,
             is_active=True
         ).count()
-        
+
         total_value = HangarItem.objects.filter(
             corporation=corp,
             is_active=True
         ).aggregate(total=Sum('estimated_value'))['total'] or 0
-        
+
         recent_transactions = HangarTransaction.objects.filter(
             corporation=corp,
             detected_at__gte=timezone.now() - timedelta(days=7)
         ).count()
-        
+
         corp_stats.append({
             'corporation': corp,
             'active_items': active_items,
             'total_value': total_value,
+            'total_value_display': isk_abbrev(total_value),
+            'wallet_display': isk_full(corp.wallet_balance) if corp.wallet_balance else None,
             'recent_transactions': recent_transactions,
             'last_sync': corp.last_sync,
         })
-    
+
     context = {
         'corp_stats': corp_stats,
         'title': 'Corp Inventory Dashboard',
         'one_hour_ago': timezone.now() - timedelta(hours=1),
     }
-    
+
     return render(request, 'corp_inventory/index.html', context)
 
 
