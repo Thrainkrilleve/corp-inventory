@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.19] - 2026-02-18
+
+### Fixed
+- CSS dark/light theme: strip all `background-color` from custom classes; wrap surfaces in Bootstrap `.panel.panel-default` / `.well` components so AA themes apply correctly across all AA versions (Bootstrap 5.3+ CSS vars like `--bs-secondary-bg` are not available in all AA4 installs)
+- Dashboard ISK display: compute `isk_abbrev()` and `isk_full()` in Python to avoid Django template filter order bug (`intcomma` stringifies before `floatformat` can act)
+- Migration 0004: consolidate `unique_together` and `indexes` into `CreateModel` options block to fix MySQL errno 150 FK constraint error
+
 ## [0.1.13] - 2026-02-17
 
 ### Fixed
