@@ -170,6 +170,21 @@ docker compose build
 docker compose restart
 ```
 
+### Migration Issues (v0.1.0 to v0.1.1+)
+
+If you see an error like `Key 'corp_inv_corp_active_idx' doesn't exist` when running migrations, use the built-in fix command:
+
+```bash
+# Docker
+docker compose exec allianceauth_gunicorn bash
+auth fix_corp_inventory_migration
+
+# Systemd
+python manage.py fix_corp_inventory_migration
+```
+
+This command automatically resolves migration history conflicts from earlier versions.
+
 ### After Updating
 
 1. Check the [CHANGELOG.md](CHANGELOG.md) for any breaking changes
@@ -308,7 +323,20 @@ sync_all_corporations()
 
 ### Common Issues
 
-1. **No valid token found**
+1. **Migration error: "Key 'corp_inv_corp_active_idx' doesn't exist"**
+   - This occurs when upgrading from v0.1.0 to v0.1.1 or later
+   - **Fix:** Run the migration fix command:
+     ```bash
+     # Docker
+     docker compose exec allianceauth_gunicorn bash
+     auth fix_corp_inventory_migration
+     
+     # Systemd
+     python manage.py fix_corp_inventory_migration
+     ```
+   - This automatically handles the migration history conflict
+
+2. **No valid token found**
    - A Corporation Director or CEO must authenticate with Alliance Auth
    - They must add an ESI token with all required scopes:
      - `esi-assets.read_corporation_assets.v1`
