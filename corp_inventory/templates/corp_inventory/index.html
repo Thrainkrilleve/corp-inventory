@@ -1,0 +1,112 @@
+{% extends "corp_inventory/base.html" %}
+{% load i18n %}
+{% load humanize %}
+
+{% block corp_inventory_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1><i class="fas fa-warehouse"></i> Corp Inventory Dashboard</h1>
+            <p class="lead">Track and monitor corporation hangar assets across all locations</p>
+        </div>
+    </div>
+    
+    {% if not corp_stats %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>No corporations being tracked.</strong>
+                <p>Contact your administrator to set up corporation hangar tracking.</p>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="row">
+        {% for stat in corp_stats %}
+        <div class="col-md-6 col-lg-4">
+            <div class="stat-card">
+                <h3>
+                    <i class="fas fa-building"></i>
+                    {{ stat.corporation.corporation_name }}
+                </h3>
+                
+                <div class="row">
+                    <div class="col-xs-6">
+                        <div class="stat-number">{{ stat.active_items|intcomma }}</div>
+                        <div class="stat-label">Items</div>
+                    </div>
+                    <div class="col-xs-6">
+                        <div class="stat-number isk-value">{{ stat.total_value|floatformat:0 }}</div>
+                        <div class="stat-label">Total Value</div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-xs-12">
+                        <p>
+                            <i class="fas fa-sync-alt"></i>
+                            <strong>Last Sync:</strong>
+                            {% if stat.last_sync %}
+                                <span class="sync-status {% if stat.last_sync > one_hour_ago %}recent{% else %}old{% endif %}">
+                                    {{ stat.last_sync|naturaltime }}
+                                </span>
+                            {% else %}
+                                <span class="sync-status old">Never</span>
+                            {% endif %}
+                        </p>
+                        <p>
+                            <i class="fas fa-exchange-alt"></i>
+                            <strong>Recent Transactions:</strong>
+                            {{ stat.recent_transactions|intcomma }} (7 days)
+                        </p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="btn-group btn-group-justified">
+                    <a href="{% url 'corp_inventory:corporation_hangar' stat.corporation.corporation_id %}" 
+                       class="btn btn-primary btn-sm">
+                        <i class="fas fa-boxes"></i> View Hangar
+                    </a>
+                    <a href="{% url 'corp_inventory:corporation_transactions' stat.corporation.corporation_id %}" 
+                       class="btn btn-info btn-sm">
+                        <i class="fas fa-list"></i> Transactions
+                    </a>
+                    <a href="{% url 'corp_inventory:statistics' stat.corporation.corporation_id %}" 
+                       class="btn btn-default btn-sm">
+                        <i class="fas fa-chart-bar"></i> Stats
+                    </a>
+                </div>
+                
+                {% if perms.corp_inventory.manage_tracking %}
+                <div style="margin-top: 10px;">
+                    <a href="{% url 'corp_inventory:sync_corporation' stat.corporation.corporation_id %}" 
+                       class="btn btn-warning btn-sm btn-block">
+                        <i class="fas fa-sync"></i> Sync Now
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="stat-card">
+                <h3><i class="fas fa-info-circle"></i> Quick Links</h3>
+                <div class="btn-group">
+                    <a href="{% url 'corp_inventory:transactions' %}" class="btn btn-default">
+                        <i class="fas fa-list"></i> All Transactions
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

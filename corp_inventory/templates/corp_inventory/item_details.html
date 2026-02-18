@@ -1,0 +1,170 @@
+{% extends "corp_inventory/base.html" %}
+{% load i18n %}
+{% load humanize %}
+
+{% block corp_inventory_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>
+                <img src="https://images.evetech.net/types/{{ item.type_id }}/icon?size=64" 
+                     alt="{{ item.type_name }}" 
+                     style="vertical-align: middle;"
+                     onerror="this.style.display='none'">
+                {{ item.type_name }}
+            </h1>
+            <p class="lead">Item Details and Transaction History</p>
+        </div>
+    </div>
+    
+    <!-- Item Details -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="stat-card">
+                <h3><i class="fas fa-info-circle"></i> Item Information</h3>
+                
+                <dl class="dl-horizontal">
+                    <dt>Type ID:</dt>
+                    <dd>{{ item.type_id }}</dd>
+                    
+                    <dt>Corporation:</dt>
+                    <dd>
+                        <a href="{% url 'corp_inventory:corporation_hangar' item.corporation.corporation_id %}">
+                            {{ item.corporation.corporation_name }}
+                        </a>
+                    </dd>
+                    
+                    <dt>Location:</dt>
+                    <dd>
+                        <a href="{% url 'corp_inventory:location' item.location.location_id %}">
+                            {{ item.location.location_name }}
+                        </a>
+                    </dd>
+                    
+                    <dt>Division:</dt>
+                    <dd>
+                        {% if item.division %}
+                            {{ item.division.division_name }}
+                        {% else %}
+                            <em class="text-muted">N/A</em>
+                        {% endif %}
+                    </dd>
+                    
+                    <dt>Quantity:</dt>
+                    <dd>{{ item.quantity|intcomma }}</dd>
+                    
+                    <dt>Estimated Value:</dt>
+                    <dd><span class="isk-value">{{ item.estimated_value|floatformat:2 }}</span></dd>
+                    
+                    <dt>First Seen:</dt>
+                    <dd>{{ item.first_seen|date:"Y-m-d H:i" }}</dd>
+                    
+                    <dt>Last Seen:</dt>
+                    <dd>{{ item.last_seen|date:"Y-m-d H:i" }}</dd>
+                    
+                    <dt>Status:</dt>
+                    <dd>
+                        {% if item.is_active %}
+                            <span class="label label-success">Active</span>
+                        {% else %}
+                            <span class="label label-default">Inactive</span>
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="stat-card">
+                <h3><i class="fas fa-chart-line"></i> Quick Stats</h3>
+                
+                <div class="stat-number">{{ item.quantity|intcomma }}</div>
+                <div class="stat-label">Current Quantity</div>
+                
+                <hr>
+                
+                <div class="stat-number isk-value">{{ item.estimated_value|floatformat:0 }}</div>
+                <div class="stat-label">Total Value</div>
+                
+                <hr>
+                
+                <div>
+                    <strong>Item ID:</strong> {{ item.item_id }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Transaction History -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="stat-card">
+                <h3><i class="fas fa-history"></i> Transaction History</h3>
+                
+                {% if transactions %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Type</th>
+                                <th>Change</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for trans in transactions %}
+                            <tr>
+                                <td>
+                                    {{ trans.detected_at|date:"Y-m-d H:i" }}
+                                    <br>
+                                    <small class="text-muted">{{ trans.detected_at|naturaltime }}</small>
+                                </td>
+                                <td>
+                                    {% if trans.transaction_type == "ADD" %}
+                                        <span class="label label-success"><i class="fas fa-plus"></i> Addition</span>
+                                    {% elif trans.transaction_type == "REMOVE" %}
+                                        <span class="label label-danger"><i class="fas fa-minus"></i> Removal</span>
+                                    {% elif trans.transaction_type == "CHANGE" %}
+                                        <span class="label label-warning"><i class="fas fa-exchange-alt"></i> Change</span>
+                                    {% else %}
+                                        <span class="label label-info"><i class="fas fa-arrows-alt"></i> Movement</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="{% if trans.quantity_change > 0 %}transaction-add{% else %}transaction-remove{% endif %}">
+                                        {{ trans.quantity_change|stringformat:"+d"|intcomma }}
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ trans.old_quantity|intcomma }} → {{ trans.new_quantity|intcomma }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <span class="isk-value">{{ trans.estimated_value|floatformat:2 }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    No transaction history available for this item.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <a href="{% url 'corp_inventory:corporation_hangar' item.corporation.corporation_id %}" 
+               class="btn btn-default">
+                <i class="fas fa-arrow-left"></i> Back to Hangar
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

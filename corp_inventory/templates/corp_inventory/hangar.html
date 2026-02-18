@@ -1,0 +1,174 @@
+{% extends "corp_inventory/base.html" %}
+{% load i18n %}
+{% load humanize %}
+
+{% block corp_inventory_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>
+                <i class="fas fa-boxes"></i>
+                {{ corporation.corporation_name }} Hangar
+            </h1>
+            <p class="lead">View all items in corporation hangars</p>
+        </div>
+    </div>
+    
+    <!-- Summary Stats -->
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_items|intcomma }}</div>
+                <div class="stat-label">Total Items</div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="stat-card">
+                <div class="stat-number isk-value">{{ total_value|floatformat:0 }}</div>
+                <div class="stat-label">Total Value</div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="stat-card">
+                <div class="stat-label">Last Sync</div>
+                <div>
+                    {% if corporation.last_sync %}
+                        {{ corporation.last_sync|naturaltime }}
+                    {% else %}
+                        Never
+                    {% endif %}
+                </div>
+                {% if perms.corp_inventory.manage_tracking %}
+                <a href="{% url 'corp_inventory:sync_corporation' corporation.corporation_id %}" 
+                   class="btn btn-warning btn-sm" style="margin-top: 10px;">
+                    <i class="fas fa-sync"></i> Sync Now
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filter-bar">
+        <form method="get" class="form-inline">
+            <div class="form-group">
+                <label for="search">Search:</label>
+                <input type="text" name="search" id="search" class="form-control" 
+                       value="{{ search_query }}" placeholder="Item name...">
+            </div>
+            
+            <div class="form-group">
+                <label for="division">Division:</label>
+                <select name="division" id="division" class="form-control">
+                    <option value="">All Divisions</option>
+                    {% for division in divisions %}
+                    <option value="{{ division.id }}" 
+                            {% if selected_division == division.id|stringformat:"s" %}selected{% endif %}>
+                        {{ division.division_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <select name="location" id="location" class="form-control">
+                    <option value="">All Locations</option>
+                    {% for location in locations %}
+                    <option value="{{ location.id }}" 
+                            {% if selected_location == location.id|stringformat:"s" %}selected{% endif %}>
+                        {{ location.location_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-filter"></i> Filter
+            </button>
+            
+            <a href="{% url 'corp_inventory:corporation_hangar' corporation.corporation_id %}" 
+               class="btn btn-default">
+                <i class="fas fa-times"></i> Clear
+            </a>
+        </form>
+    </div>
+    
+    <!-- Items Table -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="stat-card">
+                <h3><i class="fas fa-list"></i> Hangar Items</h3>
+                
+                {% if items %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Location</th>
+                                <th>Division</th>
+                                <th class="text-right">Estimated Value</th>
+                                <th>Last Seen</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>
+                                    <img src="https://images.evetech.net/types/{{ item.type_id }}/icon?size=32" 
+                                         alt="{{ item.type_name }}" 
+                                         class="item-icon"
+                                         onerror="this.style.display='none'">
+                                    <strong>{{ item.type_name }}</strong>
+                                    {% if item.is_blueprint_copy %}
+                                        <span class="label label-info">BPC</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.quantity|intcomma }}</td>
+                                <td>
+                                    <a href="{% url 'corp_inventory:location' item.location.location_id %}">
+                                        {{ item.location.location_name }}
+                                    </a>
+                                    {% if item.location.solar_system_name %}
+                                        <br>
+                                        <small class="text-muted">{{ item.location.solar_system_name }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.division %}
+                                        {{ item.division.division_name }}
+                                    {% else %}
+                                        <em class="text-muted">N/A</em>
+                                    {% endif %}
+                                </td>
+                                <td class="text-right">
+                                    <span class="isk-value">{{ item.estimated_value|floatformat:2 }}</span>
+                                </td>
+                                <td>
+                                    <small>{{ item.last_seen|naturaltime }}</small>
+                                </td>
+                                <td>
+                                    <a href="{% url 'corp_inventory:item_details' item.item_id %}" 
+                                       class="btn btn-xs btn-default">
+                                        <i class="fas fa-info-circle"></i> Details
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    No items found matching your filters.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

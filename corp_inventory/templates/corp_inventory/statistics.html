@@ -1,0 +1,134 @@
+{% extends "corp_inventory/base.html" %}
+{% load i18n %}
+{% load humanize %}
+
+{% block corp_inventory_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>
+                <i class="fas fa-chart-bar"></i>
+                {{ corporation.corporation_name }} Statistics
+            </h1>
+            <p class="lead">Analytics and insights for corporation hangar assets</p>
+        </div>
+    </div>
+    
+    <!-- Transaction Summary -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="stat-card">
+                <h3><i class="fas fa-chart-pie"></i> Transaction Summary (Last 30 Days)</h3>
+                
+                <div class="row">
+                    {% for label, count in transaction_summary.items %}
+                    <div class="col-sm-3">
+                        <div class="stat-number">{{ count|intcomma }}</div>
+                        <div class="stat-label">{{ label }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Top Items by Value -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="stat-card">
+                <h3><i class="fas fa-trophy"></i> Top 10 Items by Value</h3>
+                
+                {% if top_items %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Item</th>
+                                <th>Location</th>
+                                <th>Quantity</th>
+                                <th class="text-right">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in top_items %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    <img src="https://images.evetech.net/types/{{ item.type_id }}/icon?size=32" 
+                                         alt="{{ item.type_name }}" 
+                                         class="item-icon"
+                                         onerror="this.style.display='none'">
+                                    <a href="{% url 'corp_inventory:item_details' item.item_id %}">
+                                        {{ item.type_name }}
+                                    </a>
+                                </td>
+                                <td>{{ item.location.location_name }}</td>
+                                <td>{{ item.quantity|intcomma }}</td>
+                                <td class="text-right">
+                                    <span class="isk-value">{{ item.estimated_value|floatformat:2 }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No items found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Active Alert Rules -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="stat-card">
+                <h3><i class="fas fa-bell"></i> Active Alert Rules</h3>
+                
+                {% if alert_rules %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Item</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rule in alert_rules %}
+                            <tr>
+                                <td>{{ rule.name }}</td>
+                                <td>{{ rule.get_alert_type_display }}</td>
+                                <td>
+                                    {% if rule.type_name %}
+                                        {{ rule.type_name }}
+                                    {% else %}
+                                        <em class="text-muted">All items</em>
+                                    {% endif %}
+                                </td>
+                                <td>{{ rule.created_at|date:"Y-m-d" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No active alert rules configured.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <a href="{% url 'corp_inventory:corporation_hangar' corporation.corporation_id %}" 
+               class="btn btn-default">
+                <i class="fas fa-arrow-left"></i> Back to Hangar
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
