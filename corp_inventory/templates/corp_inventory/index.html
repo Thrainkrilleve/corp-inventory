@@ -11,7 +11,7 @@
         </div>
         <div class="col-md-4 text-right">
             {% if perms.corp_inventory.manage_corporations %}
-            <a href="{% url 'corp_inventory:manage_corporations' %}" class="btn btn-primary" style="margin-top: 20px;">
+            <a href="{% url 'corp_inventory:manage_corporations' %}" class="btn btn-primary dashboard-action-btn">
                 <i class="fas fa-cog"></i> Manage Corporations
             </a>
             {% endif %}
@@ -98,7 +98,7 @@
                 </div>
                 
                 {% if perms.corp_inventory.manage_tracking %}
-                <div style="margin-top: 10px;">
+                <div class="item-divider">
                     <a href="{% url 'corp_inventory:sync_corporation' stat.corporation.corporation_id %}" 
                        class="btn btn-warning btn-sm btn-block">
                         <i class="fas fa-sync"></i> Sync Now

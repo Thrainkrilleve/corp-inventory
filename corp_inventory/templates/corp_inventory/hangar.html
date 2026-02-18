@@ -40,7 +40,7 @@
                 </div>
                 {% if perms.corp_inventory.manage_tracking %}
                 <a href="{% url 'corp_inventory:sync_corporation' corporation.corporation_id %}" 
-                   class="btn btn-warning btn-sm" style="margin-top: 10px;">
+                   class="btn btn-warning btn-sm sync-now-btn">
                     <i class="fas fa-sync"></i> Sync Now
                 </a>
                 {% endif %}

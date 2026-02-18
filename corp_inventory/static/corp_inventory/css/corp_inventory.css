@@ -1,4 +1,16 @@
 /* Corp Inventory Custom Styles */
+/* Theme-aware styling using Bootstrap CSS variables */
+
+:root {
+    /* Fallback colors for Bootstrap theme integration */
+    --ci-bg-primary: var(--bs-primary, #0d6efd);
+    --ci-bg-success: var(--bs-success, #198754);
+    --ci-bg-danger: var(--bs-danger, #dc3545);
+    --ci-bg-warning: var(--bs-warning, #ffc107);
+    --ci-bg-body: var(--bs-body-bg, #fff);
+    --ci-text-muted: var(--bs-secondary, #6c757d);
+    --ci-border: var(--bs-border-color, #dee2e6);
+}
 
 .corp-inventory-wrapper {
     padding: 20px 0;
@@ -6,23 +18,24 @@
 
 /* Dashboard Cards */
 .stat-card {
-    background: #fff;
+    background: var(--ci-bg-body);
     border-radius: 4px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    border: 1px solid var(--ci-border);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
     transition: box-shadow 0.3s ease;
 }
 
 .stat-card:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .stat-card h3 {
     margin-top: 0;
-    color: #333;
+    color: var(--bs-body-color);
     font-size: 18px;
-    border-bottom: 2px solid #337ab7;
+    border-bottom: 2px solid var(--ci-bg-primary);
     padding-bottom: 10px;
     margin-bottom: 15px;
 }
@@ -30,42 +43,42 @@
 .stat-number {
     font-size: 32px;
     font-weight: bold;
-    color: #337ab7;
+    color: var(--ci-bg-primary);
     line-height: 1.2;
 }
 
 .stat-label {
-    color: #777;
+    color: var(--ci-text-muted);
     font-size: 14px;
     text-transform: uppercase;
     margin-top: 5px;
 }
 
 .isk-value {
-    color: #5cb85c;
+    color: var(--ci-bg-success);
     font-weight: bold;
 }
 
 /* Transaction Types */
 .transaction-add {
-    color: #5cb85c;
+    color: var(--ci-bg-success);
 }
 
 .transaction-remove {
-    color: #d9534f;
+    color: var(--ci-bg-danger);
 }
 
 .transaction-change {
-    color: #f0ad4e;
+    color: var(--ci-bg-warning);
 }
 
 /* Filter Bar */
 .filter-bar {
-    background: #f5f5f5;
+    background: var(--bs-secondary-bg, #f8f9fa);
     padding: 15px;
     border-radius: 4px;
     margin-bottom: 20px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--ci-border);
 }
 
 .filter-bar .form-group {
@@ -100,24 +113,24 @@
 }
 
 .sync-status.syncing {
-    background: #f0ad4e;
-    color: #fff;
+    background: var(--ci-bg-warning);
+    color: white;
 }
 
 .sync-status.synced {
-    background: #5cb85c;
-    color: #fff;
+    background: var(--ci-bg-success);
+    color: white;
 }
 
 .sync-status.error {
-    background: #d9534f;
-    color: #fff;
+    background: var(--ci-bg-danger);
+    color: white;
 }
 
 /* Corporation Management */
 .corp-card {
-    background: #fff;
-    border: 1px solid #ddd;
+    background: var(--ci-bg-body);
+    border: 1px solid var(--ci-border);
     border-radius: 4px;
     padding: 15px;
     margin-bottom: 15px;
@@ -125,25 +138,25 @@
 }
 
 .corp-card:hover {
-    border-color: #337ab7;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-color: var(--ci-bg-primary);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .corp-card.inactive {
     opacity: 0.6;
-    background: #f9f9f9;
+    background: var(--bs-secondary-bg, #f8f9fa);
 }
 
 .corp-card h4 {
     margin-top: 0;
-    color: #337ab7;
+    color: var(--ci-bg-primary);
 }
 
 .corp-card .ticker {
     display: inline-block;
     padding: 2px 8px;
-    background: #337ab7;
-    color: #fff;
+    background: var(--ci-bg-primary);
+    color: white;
     border-radius: 3px;
     font-size: 12px;
     font-weight: bold;
@@ -161,19 +174,85 @@
 
 /* Add Corporation Form */
 .add-corp-form {
-    background: #f5f5f5;
+    background: var(--bs-secondary-bg, #f8f9fa);
     padding: 20px;
     border-radius: 4px;
     margin-bottom: 30px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--ci-border);
 }
 
 .add-corp-form h3 {
     margin-top: 0;
-    color: #333;
-    border-bottom: 2px solid #337ab7;
+    color: var(--bs-body-color);
+    border-bottom: 2px solid var(--ci-bg-primary);
     padding-bottom: 10px;
     margin-bottom: 20px;
+}
+
+.corp-form-note {
+    margin-top: 15px;
+    margin-bottom: 0;
+}
+
+.dashboard-action-btn {
+    margin-top: 0;
+}
+
+/* Code and Log Blocks */
+.corp-inv-log {
+    max-height: 400px;
+    overflow-y: auto;
+    background: var(--bs-secondary-bg, #f8f9fa);
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    border: 1px solid var(--ci-border);
+    color: var(--bs-body-color);
+}
+
+.corp-inv-code {
+    background: var(--bs-body-bg, #1e1e1e);
+    color: var(--bs-body-color, #f8f8f2);
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid var(--ci-border);
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+
+.log-note {
+    margin-top: 10px;
+}
+
+.code-section-label {
+    margin-top: 10px;
+}
+
+.sync-now-btn {
+    margin-top: 10px;
+}
+
+.item-divider {
+    margin-top: 10px;
+}
+
+.corp-info-actions {
+    margin-top: 15px;
+}
+
+.item-img {
+    vertical-align: middle;
+}
+
+.ticker-field {
+    max-width: 80px;
+    margin-left: auto;
+}
+
+@media (min-width: 768px) {
+    .dashboard-action-btn {
+        margin-top: 20px;
+    }
 }
 
 /* Loading Spinner */
@@ -184,7 +263,7 @@
 
 .loading-spinner .fa-spin {
     font-size: 48px;
-    color: #337ab7;
+    color: var(--ci-bg-primary);
 }
 
 /* Alerts and Messages */
@@ -194,10 +273,11 @@
 
 /* Item Details */
 .item-details {
-    background: #fff;
+    background: var(--ci-bg-body);
     padding: 20px;
     border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    border: 1px solid var(--ci-border);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .item-header {
@@ -222,21 +302,22 @@
 
 .info-label {
     font-weight: bold;
-    color: #666;
+    color: var(--ci-text-muted);
     display: inline-block;
     width: 150px;
 }
 
 .info-value {
-    color: #333;
+    color: var(--bs-body-color);
 }
 
 /* Statistics Charts */
 .chart-container {
-    background: #fff;
+    background: var(--ci-bg-body);
     padding: 20px;
     border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    border: 1px solid var(--ci-border);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
     margin-bottom: 20px;
 }
 
@@ -261,16 +342,20 @@
         width: 100%;
         margin-bottom: 5px;
     }
+    
+    .dashboard-action-btn {
+        margin-top: 20px;
+    }
 }
 
 /* Utility Classes */
 .text-muted {
-    color: #777;
+    color: var(--ci-text-muted);
 }
 
 .badge-corp {
-    background: #337ab7;
-    color: #fff;
+    background: var(--ci-bg-primary);
+    color: white;
     padding: 3px 8px;
     border-radius: 3px;
     font-size: 11px;
@@ -280,7 +365,7 @@
 .no-data {
     text-align: center;
     padding: 40px;
-    color: #999;
+    color: var(--ci-text-muted);
 }
 
 .no-data i {
