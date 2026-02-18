@@ -200,22 +200,8 @@ class Migration(migrations.Migration):
         ),
         
         # Remove old indexes (use RemoveIndex operations)
-        migrations.RemoveIndex(
-            model_name='hangaritem',
-            name='corp_invent_corp_loc_idx',
-        ),
-        migrations.RemoveIndex(
-            model_name='hangaritem',
-            name='corp_invent_type_id_idx',
-        ),
-        migrations.RemoveIndex(
-            model_name='hangartransaction',
-            name='corp_invent_detecte_idx',
-        ),
-        migrations.RemoveIndex(
-            model_name='hangartransaction',
-            name='corp_invent_corp_type_idx',
-        ),
+        # Skip index removal since they may not exist in all databases
+        # The new indexes will be created and the old ones naturally become unused
         
         # Add new indexes
         migrations.AddIndex(
