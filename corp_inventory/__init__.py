@@ -6,7 +6,7 @@ __package_name__ = "allianceauth-corp-inventory"
 __app_name__ = "corp_inventory"
 __esi_compatibility_date__ = "2026-02-17"
 __app_name_useragent__ = "AA-Corp-Inventory"
-__github_url__ = f"https://github.com/Thrainkrilleve/{__package_name__}"
+__github_url__ = f"https://github.com/Thrainkrilleve/corp-inventory"
 
 __character_operations__ = []
 
