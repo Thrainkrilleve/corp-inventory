@@ -142,8 +142,14 @@ class HangarItem(models.Model):
         verbose_name_plural = "Hangar Items"
         ordering = ["-last_seen"]
         indexes = [
-            models.Index(fields=["corporation", "is_active"]),
-            models.Index(fields=["type_id", "is_active"]),
+            models.Index(
+                fields=["corporation", "is_active"],
+                name="corp_inv_corp_active_idx",
+            ),
+            models.Index(
+                fields=["type_id", "is_active"],
+                name="corp_inv_type_active_idx",
+            ),
         ]
     
     def __str__(self):
@@ -218,9 +224,18 @@ class HangarTransaction(models.Model):
         verbose_name_plural = "Hangar Transactions"
         ordering = ["-detected_at"]
         indexes = [
-            models.Index(fields=["corporation", "-detected_at"]),
-            models.Index(fields=["type_id", "-detected_at"]),
-            models.Index(fields=["character_id", "-detected_at"]),
+            models.Index(
+                fields=["corporation", "-detected_at"],
+                name="corp_inv_corp_detect_idx",
+            ),
+            models.Index(
+                fields=["type_id", "-detected_at"],
+                name="corp_inv_type_detect_idx",
+            ),
+            models.Index(
+                fields=["character_id", "-detected_at"],
+                name="corp_inv_char_detect_idx",
+            ),
         ]
     
     def __str__(self):
@@ -257,7 +272,10 @@ class HangarSnapshot(models.Model):
         verbose_name_plural = "Hangar Snapshots"
         ordering = ["-snapshot_time"]
         indexes = [
-            models.Index(fields=["corporation", "-snapshot_time"]),
+            models.Index(
+                fields=["corporation", "-snapshot_time"],
+                name="corp_inv_corp_snap_idx",
+            ),
         ]
     
     def __str__(self):

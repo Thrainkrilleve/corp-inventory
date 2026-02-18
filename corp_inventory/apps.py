@@ -6,6 +6,7 @@ class CorpInventoryConfig(AppConfig):
     label = "corp_inventory"
     verbose_name = "Corp Inventory"
     default = True
+    default_auto_field = "django.db.models.BigAutoField"
     
     def ready(self):
         """Register signal handlers, admin, and hooks"""
