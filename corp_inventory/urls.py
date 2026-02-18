@@ -66,6 +66,13 @@ urlpatterns = [
     # ESI token add (triggers EVE SSO flow)
     path('manage/add-token/', views.add_corp_token, name='add_corp_token'),
 
+    # Container access logs
+    path(
+        'corporation/<int:corporation_id>/container-logs/',
+        views.container_logs,
+        name='container_logs'
+    ),
+
     # Diagnostics
     path('logs/', views.view_logs, name='logs'),
 ]

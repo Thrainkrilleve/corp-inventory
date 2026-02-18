@@ -1,7 +1,7 @@
 ﻿/* ============================================================
    Corp Inventory - Custom Styles
-   Inherits Bootstrap 3 / Alliance Auth theme.
-   No hard-coded dark/light palette - let the AA theme handle it.
+   Uses Bootstrap 5 CSS custom properties so all colours adapt
+   automatically to Alliance Auth themes (light or dark).
    ============================================================ */
 
 /* ---- Layout ---- */
@@ -27,8 +27,8 @@
     border-radius: 4px;
     padding: 20px;
     margin-bottom: 20px;
-    background-color: #fff;
-    border: 1px solid #ddd;
+    background-color: var(--bs-secondary-bg, #fff);
+    border: 1px solid var(--bs-border-color, #dee2e6);
     box-shadow: 0 1px 3px rgba(0,0,0,.08);
     transition: box-shadow 0.2s ease;
 }
@@ -40,7 +40,7 @@
 .stat-card h3 {
     margin-top: 0;
     font-size: 17px;
-    border-bottom: 2px solid #337ab7;
+    border-bottom: 2px solid var(--bs-primary, #0d6efd);
     padding-bottom: 8px;
     margin-bottom: 14px;
 }
@@ -48,37 +48,47 @@
 .stat-number {
     font-size: 30px;
     font-weight: 700;
-    color: #337ab7;
+    color: var(--bs-primary, #0d6efd);
     line-height: 1.2;
 }
 
 .stat-label {
     font-size: 12px;
     text-transform: uppercase;
-    color: #777;
+    color: var(--bs-secondary-color, #6c757d);
     margin-top: 4px;
     letter-spacing: 0.03em;
 }
 
 .isk-value {
-    color: #3c763d;
+    color: var(--bs-success, #198754);
     font-weight: 600;
 }
 
 /* ---- Transaction labels ---- */
 
-.transaction-add    { color: #3c763d; }
-.transaction-remove { color: #a94442; }
-.transaction-change { color: #8a6d3b; }
+.transaction-add    { color: var(--bs-success, #198754); }
+.transaction-remove { color: var(--bs-danger,  #dc3545); }
+.transaction-change { color: var(--bs-warning, #ffc107); }
 
 /* ---- Filter bar ---- */
 
 .filter-bar {
-    background-color: #f5f5f5;
-    border: 1px solid #ddd;
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+    border: 1px solid var(--bs-border-color, #dee2e6);
     border-radius: 4px;
     padding: 12px 15px;
     margin-bottom: 20px;
+}
+
+/* inline label above filter controls */
+.filter-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #6c757d);
+    margin-bottom: 3px;
+    letter-spacing: 0.04em;
 }
 
 .filter-bar .form-group {
@@ -108,35 +118,54 @@
 
 /* ---- Sync status ---- */
 
-.sync-status.recent { color: #3c763d; }
-.sync-status.old    { color: #8a6d3b; }
+.sync-status.recent { color: var(--bs-success, #198754); }
+.sync-status.old    { color: var(--bs-warning, #ffc107); }
 
 .sync-now-btn { margin-top: 8px; }
 
 /* ---- Corporation cards ---- */
 
 .corp-card {
-    border: 1px solid #ddd;
+    border: 1px solid var(--bs-border-color, #dee2e6);
     border-radius: 4px;
     padding: 15px;
     margin-bottom: 15px;
-    background-color: #fff;
+    background-color: var(--bs-secondary-bg, #fff);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .corp-card:hover {
-    border-color: #337ab7;
-    box-shadow: 0 2px 6px rgba(0,0,0,.1);
+    border-color: var(--bs-primary, #0d6efd);
+    box-shadow: 0 2px 6px rgba(0,0,0,.12);
 }
 
 .corp-card.inactive {
     opacity: 0.65;
-    background-color: #f5f5f5;
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
 }
 
 .corp-card h4 {
     margin-top: 0;
-    color: #337ab7;
+    color: var(--bs-primary, #0d6efd);
+}
+
+/* corp logo + name row in manage page cards */
+.corp-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.corp-card-header img {
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.corp-card-header h4 {
+    margin: 0;
 }
 
 .corp-actions {
@@ -157,8 +186,8 @@
 /* ---- Add Corporation form ---- */
 
 .add-corp-form {
-    background-color: #f5f5f5;
-    border: 1px solid #ddd;
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+    border: 1px solid var(--bs-border-color, #dee2e6);
     border-radius: 4px;
     padding: 20px;
     margin-bottom: 24px;
@@ -166,7 +195,7 @@
 
 .add-corp-form h3 {
     margin-top: 0;
-    border-bottom: 2px solid #337ab7;
+    border-bottom: 2px solid var(--bs-primary, #0d6efd);
     padding-bottom: 8px;
     margin-bottom: 18px;
 }
@@ -180,8 +209,8 @@
     max-height: 400px;
     overflow-y: auto;
     font-size: 12px;
-    background-color: #f5f5f5;
-    border: 1px solid #ddd;
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+    border: 1px solid var(--bs-border-color, #dee2e6);
     border-radius: 4px;
     padding: 10px;
     white-space: pre-wrap;
@@ -189,8 +218,8 @@
 }
 
 .corp-inv-code {
-    background-color: #f5f5f5;
-    border: 1px solid #ddd;
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+    border: 1px solid var(--bs-border-color, #dee2e6);
     border-radius: 4px;
     padding: 10px;
     font-family: 'Courier New', monospace;
@@ -210,10 +239,10 @@ dl.dl-horizontal dd { margin-left: 160px; }
 
 .chart-container {
     padding: 20px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--bs-border-color, #dee2e6);
     border-radius: 4px;
     margin-bottom: 20px;
-    background-color: #fff;
+    background-color: var(--bs-secondary-bg, #fff);
 }
 
 /* ---- Empty state ---- */
@@ -221,7 +250,12 @@ dl.dl-horizontal dd { margin-left: 160px; }
 .no-data {
     text-align: center;
     padding: 40px;
-    color: #777;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+/* ---- Table overflow wrapper ---- */
+.corp-inv-table-wrapper {
+    overflow-x: auto;
 }
 
 .no-data i {
@@ -233,12 +267,27 @@ dl.dl-horizontal dd { margin-left: 160px; }
 /* ---- Misc ---- */
 
 .badge-corp {
-    background-color: #337ab7;
+    background-color: var(--bs-primary, #0d6efd);
     color: #fff;
     padding: 2px 7px;
     border-radius: 3px;
     font-size: 11px;
     font-weight: normal;
+}
+
+/* wallet balance display on dashboard cards */
+.wallet-balance-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.wallet-balance-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #6c757d);
+    letter-spacing: 0.04em;
 }
 
 .item-divider    { margin-top: 10px; }

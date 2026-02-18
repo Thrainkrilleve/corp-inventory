@@ -1,0 +1,153 @@
+{% extends "corp_inventory/base.html" %}
+{% load static %}
+{% load i18n %}
+{% load humanize %}
+
+{% block corp_inventory_content %}
+<div class="row">
+  <div class="col-md-12">
+
+    <!-- Page header -->
+    <div class="page-header d-flex align-items-center" style="gap:12px;">
+      <img src="https://images.evetech.net/corporations/{{ corporation.corporation_id }}/logo?size=64"
+           alt="{{ corporation.corporation_name }}" class="img-circle" style="width:48px;height:48px;">
+      <div>
+        <h2 style="margin:0;">Container Logs</h2>
+        <small class="text-muted">{{ corporation.corporation_name }}</small>
+      </div>
+      <a href="{% url 'corp_inventory:corporation_hangar' corporation.corporation_id %}"
+         class="btn btn-default btn-sm ms-auto" style="margin-left:auto;">
+        <i class="fas fa-arrow-left"></i> Back to Hangar
+      </a>
+    </div>
+
+    <!-- Filter bar -->
+    <form method="get" class="filter-bar">
+      <div class="row">
+
+        <div class="col-sm-3">
+          <label class="filter-label">Action</label>
+          <select name="action" class="form-control input-sm">
+            <option value="">All actions</option>
+            {% for value, label in action_choices %}
+            <option value="{{ value }}" {% if value == selected_action %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-sm-3">
+          <label class="filter-label">Character</label>
+          <input type="text" name="character" class="form-control input-sm"
+                 placeholder="Character name…" value="{{ character_filter }}">
+        </div>
+
+        <div class="col-sm-3">
+          <label class="filter-label">Item type</label>
+          <input type="text" name="item" class="form-control input-sm"
+                 placeholder="Item name…" value="{{ type_filter }}">
+        </div>
+
+        <div class="col-sm-3 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary btn-sm" style="margin-top:19px;">
+            <i class="fas fa-filter"></i> Filter
+          </button>
+          <a href="{% url 'corp_inventory:container_logs' corporation.corporation_id %}"
+             class="btn btn-default btn-sm" style="margin-top:19px;margin-left:6px;">
+            <i class="fas fa-times"></i> Clear
+          </a>
+        </div>
+
+      </div>
+    </form>
+
+    <!-- Log table -->
+    <div class="corp-inv-table-wrapper">
+      {% if logs %}
+      <table class="table table-hover table-condensed" id="container-log-table">
+        <thead>
+          <tr>
+            <th><i class="fas fa-clock text-muted"></i> Time</th>
+            <th><i class="fas fa-user text-muted"></i> Character</th>
+            <th><i class="fas fa-exchange-alt text-muted"></i> Action</th>
+            <th><i class="fas fa-cube text-muted"></i> Item</th>
+            <th class="text-right">Qty</th>
+            <th><i class="fas fa-box text-muted"></i> Container</th>
+            <th><i class="fas fa-map-marker-alt text-muted"></i> Location Flag</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+          <tr>
+            <td class="text-nowrap" title="{{ log.logged_at|date:'Y-m-d H:i:s' }} UTC">
+              {{ log.logged_at|date:"Y-m-d H:i" }}
+            </td>
+            <td>
+              {% if log.character_name %}
+              <a href="https://zkillboard.com/character/{{ log.character_id }}/"
+                 target="_blank" rel="noopener">{{ log.character_name }}</a>
+              {% else %}
+              <span class="text-muted">ID {{ log.character_id }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if log.action == "take" %}
+              <span class="label label-danger">{{ log.get_action_display }}</span>
+              {% elif log.action == "add" %}
+              <span class="label label-success">{{ log.get_action_display }}</span>
+              {% elif log.action == "move" %}
+              <span class="label label-info">{{ log.get_action_display }}</span>
+              {% elif log.action == "configure" or log.action == "set_password" or log.action == "lock" or log.action == "unlock" %}
+              <span class="label label-warning">{{ log.get_action_display }}</span>
+              {% else %}
+              <span class="label label-default">{{ log.get_action_display }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if log.type_name %}
+              {{ log.type_name }}
+              {% elif log.type_id %}
+              <span class="text-muted">Type {{ log.type_id }}</span>
+              {% else %}
+              <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td class="text-right">
+              {% if log.quantity is not None %}
+              {{ log.quantity|intcomma }}
+              {% else %}—{% endif %}
+            </td>
+            <td>
+              {% if log.container_type_name %}
+              {{ log.container_type_name }}
+              {% elif log.container_type_id %}
+              <span class="text-muted">Type {{ log.container_type_id }}</span>
+              {% else %}
+              <span class="text-muted">ID {{ log.container_id }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="text-muted">{{ log.location_flag|default:"—" }}</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if logs|length >= 500 %}
+      <p class="text-muted text-center">
+        <i class="fas fa-info-circle"></i>
+        Showing the 500 most recent entries matching your filter.
+      </p>
+      {% endif %}
+      {% else %}
+      <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        No container log entries found{% if selected_action or character_filter or type_filter %} matching your filter{% endif %}.
+        Container logs are synced automatically. Make sure the token holder has the
+        <code>esi-corporations.read_container_logs.v1</code> scope and has Director role in-game.
+      </div>
+      {% endif %}
+    </div><!-- /.corp-inv-table-wrapper -->
+
+  </div>
+</div>
+{% endblock %}

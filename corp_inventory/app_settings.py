@@ -10,6 +10,7 @@ CORPINVENTORY_ESI_SCOPES = [
     "esi-corporations.read_divisions.v1",
     "esi-universe.read_structures.v1",  # Required for structure names
     "esi-wallet.read_corporation_wallets.v1",  # Required for corp ISK balance
+    "esi-corporations.read_container_logs.v1",  # Required for container access logs
 ]
 
 # How often to sync hangar data (in minutes)

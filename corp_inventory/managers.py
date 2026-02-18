@@ -262,6 +262,44 @@ class CorpInventoryManager:
             )
             return []
 
+    @staticmethod
+    def get_corporation_container_logs(token, corporation_id: int) -> list:
+        """
+        Fetch container access logs for a corporation.
+
+        Requires scope: esi-corporations.read_container_logs.v1
+
+        Returns:
+            List of container log dicts from ESI
+        """
+        try:
+            client = esi.client
+            all_logs = []
+            page = 1
+            while True:
+                result = client.Corporation.get_corporations_corporation_id_containers_logs(
+                    corporation_id=corporation_id,
+                    token=token.valid_access_token(),
+                    page=page,
+                ).results()
+                if not result:
+                    break
+                all_logs.extend(result)
+                if len(result) < 1000:
+                    break
+                page += 1
+
+            logger.info(
+                f"Retrieved {len(all_logs)} container log entries for corporation {corporation_id}"
+            )
+            return all_logs
+
+        except Exception as e:
+            logger.error(
+                f"Error fetching container logs for corporation {corporation_id}: {e}"
+            )
+            return []
+
 
 class PriceManager:
     """

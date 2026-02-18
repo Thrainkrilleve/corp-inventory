@@ -13,6 +13,7 @@ from esi.models import Token
 
 from .models import (
     Corporation,
+    ContainerLog,
     HangarDivision,
     Location,
     HangarItem,
@@ -119,6 +120,9 @@ def sync_corporation_hangar(corporation_id: int):
         # Update last sync time
         corporation.last_sync = timezone.now()
         corporation.save()
+
+        # Sync container access logs (best-effort — requires container logs scope)
+        sync_container_logs(corporation, token)
         
         msg = f"Completed sync for {corporation.corporation_name} - {items_count} items processed"
         logger.info(msg)
@@ -176,6 +180,84 @@ def get_corporation_token(corporation_id: int) -> Token:
     except Exception as e:
         logger.error(f"Error getting token for corporation {corporation_id}: {e}")
         return None
+
+
+def sync_container_logs(corporation: Corporation, token: Token):
+    """
+    Sync container access logs for a corporation.
+
+    Fetches up to 1 000 log entries per page from ESI and upserts them into
+    ContainerLog. The model's unique_together constraint prevents duplicates.
+
+    Requires scope: esi-corporations.read_container_logs.v1
+    """
+    try:
+        log_entries = CorpInventoryManager.get_corporation_container_logs(
+            token, corporation.corporation_id
+        )
+        if not log_entries:
+            logger.info(f"No container log entries for {corporation.corporation_name}")
+            return
+
+        # Resolve type names for container types and item types we haven't seen yet
+        type_cache: dict = {}
+
+        def resolve_type(type_id):
+            if type_id is None:
+                return ""
+            if type_id not in type_cache:
+                info = CorpInventoryManager.get_type_info(type_id)
+                type_cache[type_id] = info.get("name", "") if info else ""
+            return type_cache[type_id]
+
+        created_count = 0
+        for entry in log_entries:
+            character_id = entry.get("logged_by")  # ESI field name
+            if not character_id:
+                continue
+
+            # Resolve character name from AA's EveCharacter if possible
+            character_name = ""
+            try:
+                from allianceauth.eveonline.models import EveCharacter
+                char_obj = EveCharacter.objects.filter(character_id=character_id).first()
+                character_name = char_obj.character_name if char_obj else ""
+            except Exception:
+                pass
+
+            type_id = entry.get("type_id")
+            container_type_id = entry.get("container_type_id")
+
+            _, was_created = ContainerLog.objects.get_or_create(
+                corporation=corporation,
+                character_id=character_id,
+                container_id=entry.get("container_id", 0),
+                action=entry.get("action", ""),
+                type_id=type_id,
+                quantity=entry.get("quantity"),
+                logged_at=entry.get("logged_at"),
+                defaults={
+                    "character_name": character_name,
+                    "type_name": resolve_type(type_id),
+                    "container_type_id": container_type_id,
+                    "container_type_name": resolve_type(container_type_id),
+                    "location_id": entry.get("location_id"),
+                    "location_flag": entry.get("location_flag", ""),
+                },
+            )
+            if was_created:
+                created_count += 1
+
+        logger.info(
+            f"Container logs for {corporation.corporation_name}: "
+            f"{created_count} new entries (of {len(log_entries)} fetched)"
+        )
+
+    except Exception as e:
+        logger.warning(
+            f"Could not sync container logs for {corporation.corporation_name}: {e}",
+            exc_info=True,
+        )
 
 
 def sync_divisions(corporation: Corporation, token: Token):

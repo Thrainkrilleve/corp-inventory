@@ -17,6 +17,7 @@ from esi.decorators import token_required
 from . import app_settings
 from .models import (
     Corporation,
+    ContainerLog,
     HangarDivision,
     Location,
     HangarItem,
@@ -595,3 +596,45 @@ def view_logs(request):
     }
     
     return render(request, 'corp_inventory/logs.html', context)
+
+
+@login_required
+@permission_required("corp_inventory.basic_access", raise_exception=True)
+def container_logs(request, corporation_id: int):
+    """
+    Show container access logs for a corporation with character attribution.
+    Displays who added/took/moved items to/from locked containers.
+    """
+    corporation = get_object_or_404(Corporation, corporation_id=corporation_id)
+
+    # Build queryset — newest first
+    qs = ContainerLog.objects.filter(corporation=corporation).order_by("-logged_at")
+
+    # Optional filters
+    action_filter = request.GET.get("action", "")
+    character_filter = request.GET.get("character", "").strip()
+    type_filter = request.GET.get("item", "").strip()
+
+    if action_filter:
+        qs = qs.filter(action=action_filter)
+    if character_filter:
+        qs = qs.filter(character_name__icontains=character_filter)
+    if type_filter:
+        qs = qs.filter(type_name__icontains=type_filter)
+
+    # Paginate: up to 500 per page is fine for container logs
+    qs = qs[:500]
+
+    # Unique action choices for filter dropdown
+    action_choices = ContainerLog._meta.get_field("action").choices
+
+    context = {
+        "corporation": corporation,
+        "logs": qs,
+        "action_choices": action_choices,
+        "selected_action": action_filter,
+        "character_filter": character_filter,
+        "type_filter": type_filter,
+        "title": f"Container Logs — {corporation.corporation_name}",
+    }
+    return render(request, "corp_inventory/container_logs.html", context)
