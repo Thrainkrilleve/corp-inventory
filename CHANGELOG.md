@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.9] - 2026-02-17
+
+### Fixed
+- Remove unused CORPINVENTORY_ESI_TOKEN_URL from app_settings.py (now uses auto-detection in views.py)
+
 ## [0.1.8] - 2026-02-17
 
 ### Fixed
