@@ -63,6 +63,9 @@ urlpatterns = [
         name='delete_corporation'
     ),
     
+    # ESI token add (triggers EVE SSO flow)
+    path('manage/add-token/', views.add_corp_token, name='add_corp_token'),
+
     # Diagnostics
     path('logs/', views.view_logs, name='logs'),
 ]

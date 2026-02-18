@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.1.11] - 2026-02-17
+
+### Changed
+- Replace ESI token URL detection with a proper `add_corp_token` view using `@token_required` decorator for direct EVE SSO flow
+
 ## [0.1.10] - 2026-02-17
 
 ### Fixed

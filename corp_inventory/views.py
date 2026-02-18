@@ -12,6 +12,8 @@ from django.urls import NoReverseMatch, reverse
 from django.utils import timezone
 from datetime import timedelta
 
+from esi.decorators import token_required
+
 from . import app_settings
 from .models import (
     Corporation,
@@ -344,6 +346,22 @@ def api_hangar_data(request, corporation_id):
         })
     
     return JsonResponse({'items': data})
+
+
+@login_required
+@permission_required("corp_inventory.manage_corporations", raise_exception=True)
+@token_required(scopes=app_settings.CORPINVENTORY_ESI_SCOPES)
+def add_corp_token(request, token):
+    """
+    Redirect user through EVE SSO to add a corporation ESI token.
+    The @token_required decorator handles the SSO flow automatically.
+    """
+    messages.success(
+        request,
+        f"ESI token added for {token.character_name}. "
+        f"If this character is a Director or CEO, corporation data will sync automatically."
+    )
+    return redirect('corp_inventory:manage_corporations')
 
 
 @login_required
