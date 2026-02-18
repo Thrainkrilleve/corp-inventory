@@ -19,7 +19,7 @@
 <!-- Item Details -->
 <div class="row">
         <div class="col-md-6">
-            <div class="stat-card">
+            <div class="panel panel-default stat-card">
                 <h3><i class="fas fa-info-circle"></i> Item Information</h3>
                 
                 <dl class="dl-horizontal">
@@ -74,7 +74,7 @@
         </div>
         
         <div class="col-md-6">
-            <div class="stat-card">
+            <div class="panel panel-default stat-card">
                 <h3><i class="fas fa-chart-line"></i> Quick Stats</h3>
                 
                 <div class="stat-number">{{ item.quantity|intcomma }}</div>
@@ -97,7 +97,7 @@
 <!-- Transaction History -->
 <div class="row">
         <div class="col-md-12">
-            <div class="stat-card">
+            <div class="panel panel-default stat-card">
                 <h3><i class="fas fa-history"></i> Transaction History</h3>
                 
                 {% if transactions %}

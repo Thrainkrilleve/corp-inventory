@@ -13,7 +13,7 @@
 <!-- Add Corporation Form -->
 <div class="row">
         <div class="col-md-12">
-            <div class="add-corp-form">
+            <div class="panel panel-default add-corp-form">
                 <h3><i class="fas fa-plus-circle"></i> Add New Corporation</h3>
                 <form method="post" action="{% url 'corp_inventory:manage_corporations' %}">
                     {% csrf_token %}
@@ -83,7 +83,7 @@
             <div class="row">
                 {% for corp in corporations %}
                 <div class="col-md-6">
-                    <div class="corp-card {% if not corp.tracking_enabled %}inactive{% endif %}">
+                    <div class="panel panel-default corp-card {% if not corp.tracking_enabled %}inactive{% endif %}">
                         <div class="row">
                             <div class="col-xs-8">
                                 <h4>{{ corp.corporation_name }}</h4>

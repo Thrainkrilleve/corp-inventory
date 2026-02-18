@@ -1,8 +1,321 @@
 ﻿/* ============================================================
    Corp Inventory - Custom Styles
-   Uses Bootstrap 5 CSS custom properties so all colours adapt
-   automatically to Alliance Auth themes (light or dark).
+   We deliberately set NO background-color on any surface.
+   Card/panel backgrounds come from Bootstrap's .panel or .card
+   component classes, which Alliance Auth themes correctly in
+   both light and dark mode without us needing to override them.
    ============================================================ */
+
+/* ---- Layout ---- */
+
+.corp-inventory-wrapper {
+    padding: 0;
+}
+
+.ci-navbar {
+    padding: 10px 15px 0 15px;
+    margin-bottom: 10px;
+}
+
+.ci-content {
+    padding: 0 15px 20px 15px;
+}
+
+/* ---- Stat card shell (uses Bootstrap .panel for bg/border) ---- */
+
+.stat-card {
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+    /* no background-color — inherited from .panel-default */
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    transition: box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    box-shadow: 0 3px 8px rgba(0,0,0,.15);
+}
+
+.stat-card h3 {
+    margin-top: 0;
+    font-size: 17px;
+    border-bottom: 2px solid #337ab7;
+    padding-bottom: 8px;
+    margin-bottom: 14px;
+}
+
+/* corp logo + name row */
+.corp-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.corp-card-header img {
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.corp-card-header h3,
+.corp-card-header h4 {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+/* ---- Numbers ---- */
+
+.stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    color: #337ab7;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-top: 3px;
+    letter-spacing: 0.04em;
+}
+
+.isk-value {
+    color: #3c763d;
+    font-weight: 600;
+}
+
+/* ---- Transaction labels ---- */
+
+.transaction-add    { color: #3c763d; }
+.transaction-remove { color: #a94442; }
+.transaction-change { color: #8a6d3b; }
+
+/* ---- Sync status ---- */
+
+.sync-status.recent { color: #3c763d; }
+.sync-status.old    { color: #a94442; }
+
+/* ---- Filter bar (uses Bootstrap .well for bg/border) ---- */
+
+.filter-bar {
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    /* no background-color — applied via .well class on the element */
+}
+
+.filter-bar .form-group {
+    margin-bottom: 8px;
+    margin-right: 10px;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+}
+
+.filter-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    opacity: 0.65;
+    margin-bottom: 3px;
+    letter-spacing: 0.04em;
+}
+
+/* ---- Corp management cards ---- */
+
+.corp-card {
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 15px;
+    /* no background-color — from .panel-default */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.corp-card:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,.12);
+}
+
+.corp-card.inactive {
+    opacity: 0.65;
+}
+
+.corp-card h4 {
+    margin-top: 0;
+    color: #337ab7;
+}
+
+.corp-card-header h4 {
+    color: #337ab7;
+}
+
+.corp-actions {
+    margin-top: 10px;
+}
+
+.corp-actions .btn {
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
+
+.corp-logo {
+    max-width: 80px;
+    margin-left: auto;
+    display: block;
+}
+
+/* ---- Add Corporation form ---- */
+
+.add-corp-form {
+    padding: 20px;
+    margin-bottom: 24px;
+    border-radius: 4px;
+    /* no background-color — from .well */
+}
+
+.add-corp-form h3 {
+    margin-top: 0;
+    border-bottom: 2px solid #337ab7;
+    padding-bottom: 8px;
+    margin-bottom: 18px;
+}
+
+.corp-form-note    { margin-top: 12px; margin-bottom: 0; }
+.corp-info-actions { margin-top: 12px; }
+
+/* ---- Code/Log blocks ---- */
+
+.corp-inv-log {
+    max-height: 400px;
+    overflow-y: auto;
+    font-size: 12px;
+    /* no background — from .well or pre */
+    border-radius: 4px;
+    padding: 10px;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.corp-inv-code {
+    border-radius: 4px;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    overflow-x: auto;
+    white-space: pre;
+    /* uses <pre> default styling which AA themes */
+}
+
+.code-section-label { margin-top: 10px; }
+
+/* ---- Item details ---- */
+
+dl.dl-horizontal dt { width: 140px; }
+dl.dl-horizontal dd { margin-left: 160px; }
+
+/* ---- Charts ---- */
+
+.chart-container {
+    padding: 20px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    /* no background — from .panel-default */
+}
+
+/* ---- Tables ---- */
+
+.item-icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.item-img {
+    width: 48px;
+    height: 48px;
+    margin-right: 12px;
+    vertical-align: middle;
+}
+
+.corp-inv-table-wrapper {
+    overflow-x: auto;
+}
+
+/* ---- Empty state ---- */
+
+.no-data {
+    text-align: center;
+    padding: 40px;
+    opacity: 0.6;
+}
+
+.no-data i {
+    font-size: 48px;
+    margin-bottom: 12px;
+    display: block;
+}
+
+/* ---- Wallet balance row ---- */
+
+.wallet-balance-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.wallet-balance-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    opacity: 0.65;
+    letter-spacing: 0.04em;
+}
+
+/* ---- Misc ---- */
+
+.badge-corp {
+    background-color: #337ab7;
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: normal;
+}
+
+.item-divider { margin-top: 10px; }
+.log-note     { margin-top: 10px; }
+.sync-now-btn { margin-top: 8px; }
+
+/* ---- Responsive ---- */
+
+@media (max-width: 768px) {
+    .ci-navbar   { padding: 8px 10px 0 10px; }
+    .stat-number { font-size: 22px; }
+    .filter-bar  { padding: 10px; }
+
+    .corp-actions .btn {
+        display: block;
+        width: 100%;
+        margin-right: 0;
+    }
+
+    dl.dl-horizontal dt,
+    dl.dl-horizontal dd {
+        float: none;
+        width: auto;
+        margin-left: 0;
+    }
+
+    .corp-card-header img {
+        width: 36px;
+        height: 36px;
+    }
+}
+
 
 /* ---- Layout ---- */
 

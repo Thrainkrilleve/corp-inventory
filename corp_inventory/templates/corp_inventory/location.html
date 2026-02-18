@@ -23,19 +23,19 @@
 <!-- Summary Stats -->
 <div class="row">
         <div class="col-sm-4">
-            <div class="stat-card">
+            <div class="panel panel-default stat-card">
                 <div class="stat-number">{{ total_items|intcomma }}</div>
                 <div class="stat-label">Total Items</div>
             </div>
         </div>
         <div class="col-sm-4">
-            <div class="stat-card">
+            <div class="panel panel-default stat-card">
                 <div class="stat-number isk-value">{{ total_value|floatformat:0 }}</div>
                 <div class="stat-label">Total Value</div>
             </div>
         </div>
         <div class="col-sm-4">
-            <div class="stat-card">
+            <div class="panel panel-default stat-card">
                 <div class="stat-label">Location Type</div>
                 <div><strong>{{ location.location_type|title }}</strong></div>
                 <div class="text-muted">ID: {{ location.location_id }}</div>
@@ -48,7 +48,7 @@
     <div class="col-md-12">
             {% if corp_items %}
                 {% for corp_name, items in corp_items.items %}
-                <div class="stat-card">
+                <div class="panel panel-default stat-card">
                     <h3><i class="fas fa-building"></i> {{ corp_name }}</h3>
                     
                     <div class="table-responsive">
@@ -101,7 +101,7 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <div class="stat-card">
+                <div class="panel panel-default stat-card">
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i>
                         No items found at this location.

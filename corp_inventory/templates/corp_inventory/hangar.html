@@ -16,19 +16,19 @@
 <!-- Summary Stats -->
 <div class="row">
         <div class="col-sm-4">
-            <div class="stat-card">
+            <div class="panel panel-default stat-card">
                 <div class="stat-number">{{ total_items|intcomma }}</div>
                 <div class="stat-label">Total Items</div>
             </div>
         </div>
         <div class="col-sm-4">
-            <div class="stat-card">
-                <div class="stat-number isk-value">{{ total_value|floatformat:0 }}</div>
-                <div class="stat-label">Total Value</div>
+            <div class="panel panel-default stat-card">
+                <div class="stat-number isk-value">{{ total_value|floatformat:2 }}</div>
+                <div class="stat-label">Total Value (ISK)</div>
             </div>
         </div>
         <div class="col-sm-4">
-            <div class="stat-card">
+            <div class="panel panel-default stat-card">
                 <div class="stat-label">Last Sync</div>
                 <div>
                     {% if corporation.last_sync %}
@@ -48,7 +48,7 @@
     </div>
     
 <!-- Filters -->
-<div class="filter-bar">
+<div class="well well-sm filter-bar">
         <form method="get" id="hangar-filter-form" class="form-inline">
             <div class="form-group">
                 <label for="search">Search:</label>
@@ -95,7 +95,7 @@
 <!-- Items Table -->
 <div class="row">
     <div class="col-md-12">
-        <div class="stat-card">
+        <div class="panel panel-default stat-card">
                 <h3><i class="fas fa-list"></i> Hangar Items</h3>
                 
                 {% if items %}
