@@ -1,4 +1,4 @@
-# Generated migration for Corp Inventory
+# Generated migration for Corp Inventory - Complete schema with all fields
 
 from django.conf import settings
 from django.db import migrations, models
@@ -62,15 +62,31 @@ class Migration(migrations.Migration):
                 ('location_name', models.CharField(max_length=254)),
                 ('location_type', models.CharField(max_length=50)),
                 ('solar_system_id', models.IntegerField(blank=True, null=True)),
-                ('solar_system_name', models.CharField(blank=True, max_length=100)),
+                ('solar_system_name', models.CharField(blank=True, default='', max_length=100)),
                 ('region_id', models.IntegerField(blank=True, null=True)),
-                ('region_name', models.CharField(blank=True, max_length=100)),
+                ('region_name', models.CharField(blank=True, default='', max_length=100)),
                 ('last_update', models.DateTimeField(auto_now=True)),
             ],
             options={
                 'verbose_name': 'Location',
                 'verbose_name_plural': 'Locations',
                 'ordering': ['location_name'],
+            },
+        ),
+        migrations.CreateModel(
+            name='HangarSnapshot',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('snapshot_time', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
+                ('total_items', models.IntegerField(default=0)),
+                ('total_value', models.DecimalField(decimal_places=2, default=0, max_digits=20)),
+                ('snapshot_data', models.JSONField(default=dict)),
+                ('corporation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='snapshots', to='corp_inventory.corporation')),
+            ],
+            options={
+                'verbose_name': 'Hangar Snapshot',
+                'verbose_name_plural': 'Hangar Snapshots',
+                'ordering': ['-snapshot_time'],
             },
         ),
         migrations.CreateModel(
@@ -81,7 +97,7 @@ class Migration(migrations.Migration):
                 ('type_id', models.IntegerField(db_index=True)),
                 ('type_name', models.CharField(max_length=254)),
                 ('quantity', models.BigIntegerField(default=1)),
-                ('estimated_value', models.DecimalField(decimal_places=2, default=0, max_digits=20, help_text='Estimated ISK value')),
+                ('estimated_value', models.DecimalField(decimal_places=2, default=0, help_text='Estimated ISK value', max_digits=20)),
                 ('is_singleton', models.BooleanField(default=False)),
                 ('is_blueprint_copy', models.BooleanField(default=False)),
                 ('first_seen', models.DateTimeField(auto_now_add=True)),
@@ -101,11 +117,7 @@ class Migration(migrations.Migration):
             name='HangarTransaction',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('transaction_type', models.CharField(
-                    choices=[('ADD', 'Addition'), ('REMOVE', 'Removal'), ('MOVE', 'Movement'), ('CHANGE', 'Quantity Change')],
-                    db_index=True,
-                    max_length=10
-                )),
+                ('transaction_type', models.CharField(choices=[('ADD', 'Addition'), ('REMOVE', 'Removal'), ('MOVE', 'Movement'), ('CHANGE', 'Quantity Change')], db_index=True, max_length=10)),
                 ('type_id', models.IntegerField(db_index=True)),
                 ('type_name', models.CharField(max_length=254)),
                 ('quantity_change', models.BigIntegerField()),
@@ -127,32 +139,13 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='HangarSnapshot',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('snapshot_time', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
-                ('total_items', models.IntegerField(default=0)),
-                ('total_value', models.DecimalField(decimal_places=2, default=0, max_digits=20)),
-                ('snapshot_data', models.JSONField(default=dict)),
-                ('corporation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='snapshots', to='corp_inventory.corporation')),
-            ],
-            options={
-                'verbose_name': 'Hangar Snapshot',
-                'verbose_name_plural': 'Hangar Snapshots',
-                'ordering': ['-snapshot_time'],
-            },
-        ),
-        migrations.CreateModel(
             name='AlertRule',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=200)),
-                ('alert_type', models.CharField(
-                    choices=[('ITEM_ADDED', 'Item Added'), ('ITEM_REMOVED', 'Item Removed'), ('VALUE_THRESHOLD', 'Value Threshold Exceeded'), ('QUANTITY_CHANGE', 'Quantity Changed')],
-                    max_length=20
-                )),
+                ('alert_type', models.CharField(choices=[('ITEM_ADDED', 'Item Added'), ('ITEM_REMOVED', 'Item Removed'), ('VALUE_THRESHOLD', 'Value Threshold Exceeded'), ('QUANTITY_CHANGE', 'Quantity Changed')], max_length=20)),
                 ('type_id', models.IntegerField(blank=True, null=True)),
-                ('type_name', models.CharField(blank=True, default='', max_length=254, null=True)),
+                ('type_name', models.CharField(blank=True, default='', max_length=254)),
                 ('value_threshold', models.DecimalField(blank=True, decimal_places=2, max_digits=20, null=True)),
                 ('quantity_threshold', models.BigIntegerField(blank=True, null=True)),
                 ('is_active', models.BooleanField(default=True)),
@@ -167,6 +160,7 @@ class Migration(migrations.Migration):
                 'ordering': ['corporation', 'name'],
             },
         ),
+        # Add indexes
         migrations.AddIndex(
             model_name='hangaritem',
             index=models.Index(fields=['corporation', 'is_active']),
