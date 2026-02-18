@@ -93,7 +93,15 @@ Grant permissions to users/groups in Alliance Auth admin:
 
 ### Step 8: Set Up Corporations
 
-**Option A: Through the App (Recommended)**
+**Automatic Detection (Recommended)**
+
+When a Director or CEO from your corporation authenticates with Alliance Auth and adds their ESI token with the required scopes, their corporation is **automatically detected and added** to the tracking list with tracking enabled.
+
+**Manual Addition (Alternative)**
+
+If you prefer to manually add corporations or need to add a corporation whose Director/CEO hasn't authenticated yet:
+
+**Option A: Through the App**
 1. Navigate to Corp Inventory in Alliance Auth
 2. Click "Manage Corporations"
 3. Enter your corporation ID, name, and ticker

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Automatic corporation detection and tracking when characters authenticate via ESI
+- Signal handler that adds corporations to tracking list when new Director/CEO characters authenticate
+- Eliminates need for manual corporation entry in most cases
+
 ## [0.1.1] - 2026-02-17
 
 ### Added
