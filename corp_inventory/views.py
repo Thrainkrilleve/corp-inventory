@@ -395,24 +395,26 @@ def manage_corporations(request):
     # GET request - show all corporations
     corporations = Corporation.objects.all().order_by('-tracking_enabled', 'corporation_name')
     
-    esi_token_url = getattr(
-        app_settings,
-        "CORPINVENTORY_ESI_TOKEN_URL",
-        "/auth/eveauth/",
-    )
-    for url_name in (
-        "authentication:token_management",
-        "authentication:add_character",
-        "esi:token_add",
-        "esi:character_add",
-        "eveonline:token_add",
-        "eveonline:character_add",
-    ):
-        try:
-            esi_token_url = reverse(url_name)
-            break
-        except NoReverseMatch:
-            continue
+    # Determine ESI token URL - try user setting first, then auto-detect, then fallback
+    from django.conf import settings
+    if hasattr(settings, 'CORPINVENTORY_ESI_TOKEN_URL'):
+        esi_token_url = settings.CORPINVENTORY_ESI_TOKEN_URL
+    else:
+        # Try to auto-detect the correct URL
+        esi_token_url = "/auth/eveauth/"  # fallback
+        for url_name in (
+            "authentication:token_management",
+            "authentication:add_character",
+            "esi:token_add",
+            "esi:character_add",
+            "eveonline:token_add",
+            "eveonline:character_add",
+        ):
+            try:
+                esi_token_url = reverse(url_name)
+                break
+            except NoReverseMatch:
+                continue
 
     context = {
         'corporations': corporations,

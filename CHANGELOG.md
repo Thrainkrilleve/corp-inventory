@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.8] - 2026-02-17
+
+### Fixed
+- Fix ESI token URL detection logic to properly auto-detect `authentication:token_management` instead of using fallback
+
 ## [0.1.7] - 2026-02-17
 
 ### Fixed
