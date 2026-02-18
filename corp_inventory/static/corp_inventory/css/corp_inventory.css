@@ -1,15 +1,60 @@
 /* Corp Inventory Custom Styles */
-/* Theme-aware styling using Bootstrap CSS variables */
+/* Theme-aware styling - works with both light and dark themes */
 
+/* Initialize CSS variables - these should be overridden by Alliance Auth's theme system */
 :root {
-    /* Fallback colors for Bootstrap theme integration */
-    --ci-bg-primary: var(--bs-primary, #0d6efd);
-    --ci-bg-success: var(--bs-success, #198754);
-    --ci-bg-danger: var(--bs-danger, #dc3545);
-    --ci-bg-warning: var(--bs-warning, #ffc107);
-    --ci-bg-body: var(--bs-body-bg, #fff);
-    --ci-text-muted: var(--bs-secondary, #6c757d);
-    --ci-border: var(--bs-border-color, #dee2e6);
+    --ci-primary: #0d6efd;
+    --ci-success: #198754;
+    --ci-danger: #dc3545;
+    --ci-warning: #ffc107;
+    --ci-bg-body: #fff;
+    --ci-bg-secondary: #f8f9fa;
+    --ci-text-body: #212529;
+    --ci-text-muted: #6c757d;
+    --ci-border: #dee2e6;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --ci-primary: #0d6efd;
+        --ci-success: #198754;
+        --ci-danger: #dc3545;
+        --ci-warning: #ffc107;
+        --ci-bg-body: #212529;
+        --ci-bg-secondary: #343a40;
+        --ci-text-body: #f8f9fa;
+        --ci-text-muted: #adb5bd;
+        --ci-border: #495057;
+    }
+}
+
+/* Support for explicit dark theme class (aa-gdpr style) */
+[data-bs-theme="dark"],
+.dark-theme {
+    --ci-primary: #0d6efd;
+    --ci-success: #198754;
+    --ci-danger: #dc3545;
+    --ci-warning: #ffc107;
+    --ci-bg-body: #212529;
+    --ci-bg-secondary: #343a40;
+    --ci-text-body: #f8f9fa;
+    --ci-text-muted: #adb5bd;
+    --ci-border: #495057;
+}
+
+/* Support for explicit light theme class */
+[data-bs-theme="light"],
+.light-theme {
+    --ci-primary: #0d6efd;
+    --ci-success: #198754;
+    --ci-danger: #dc3545;
+    --ci-warning: #ffc107;
+    --ci-bg-body: #fff;
+    --ci-bg-secondary: #f8f9fa;
+    --ci-text-body: #212529;
+    --ci-text-muted: #6c757d;
+    --ci-border: #dee2e6;
 }
 
 .corp-inventory-wrapper {
@@ -19,6 +64,7 @@
 /* Dashboard Cards */
 .stat-card {
     background: var(--ci-bg-body);
+    color: var(--ci-text-body);
     border-radius: 4px;
     padding: 20px;
     margin-bottom: 20px;
@@ -33,9 +79,9 @@
 
 .stat-card h3 {
     margin-top: 0;
-    color: var(--bs-body-color);
+    color: var(--ci-text-body);
     font-size: 18px;
-    border-bottom: 2px solid var(--ci-bg-primary);
+    border-bottom: 2px solid var(--ci-primary);
     padding-bottom: 10px;
     margin-bottom: 15px;
 }
@@ -43,7 +89,7 @@
 .stat-number {
     font-size: 32px;
     font-weight: bold;
-    color: var(--ci-bg-primary);
+    color: var(--ci-primary);
     line-height: 1.2;
 }
 
@@ -55,26 +101,27 @@
 }
 
 .isk-value {
-    color: var(--ci-bg-success);
+    color: var(--ci-success);
     font-weight: bold;
 }
 
 /* Transaction Types */
 .transaction-add {
-    color: var(--ci-bg-success);
+    color: var(--ci-success);
 }
 
 .transaction-remove {
-    color: var(--ci-bg-danger);
+    color: var(--ci-danger);
 }
 
 .transaction-change {
-    color: var(--ci-bg-warning);
+    color: var(--ci-warning);
 }
 
 /* Filter Bar */
 .filter-bar {
-    background: var(--bs-secondary-bg, #f8f9fa);
+    background: var(--ci-bg-secondary);
+    color: var(--ci-text-body);
     padding: 15px;
     border-radius: 4px;
     margin-bottom: 20px;
@@ -96,6 +143,7 @@
 
 .hangar-table td, .hangar-table th {
     vertical-align: middle !important;
+    color: var(--ci-text-body);
 }
 
 .item-icon {
@@ -113,23 +161,24 @@
 }
 
 .sync-status.syncing {
-    background: var(--ci-bg-warning);
+    background: var(--ci-warning);
     color: white;
 }
 
 .sync-status.synced {
-    background: var(--ci-bg-success);
+    background: var(--ci-success);
     color: white;
 }
 
 .sync-status.error {
-    background: var(--ci-bg-danger);
+    background: var(--ci-danger);
     color: white;
 }
 
 /* Corporation Management */
 .corp-card {
     background: var(--ci-bg-body);
+    color: var(--ci-text-body);
     border: 1px solid var(--ci-border);
     border-radius: 4px;
     padding: 15px;
@@ -138,24 +187,24 @@
 }
 
 .corp-card:hover {
-    border-color: var(--ci-bg-primary);
+    border-color: var(--ci-primary);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .corp-card.inactive {
     opacity: 0.6;
-    background: var(--bs-secondary-bg, #f8f9fa);
+    background: var(--ci-bg-secondary);
 }
 
 .corp-card h4 {
     margin-top: 0;
-    color: var(--ci-bg-primary);
+    color: var(--ci-primary);
 }
 
 .corp-card .ticker {
     display: inline-block;
     padding: 2px 8px;
-    background: var(--ci-bg-primary);
+    background: var(--ci-primary);
     color: white;
     border-radius: 3px;
     font-size: 12px;
@@ -174,7 +223,8 @@
 
 /* Add Corporation Form */
 .add-corp-form {
-    background: var(--bs-secondary-bg, #f8f9fa);
+    background: var(--ci-bg-secondary);
+    color: var(--ci-text-body);
     padding: 20px;
     border-radius: 4px;
     margin-bottom: 30px;
@@ -183,8 +233,8 @@
 
 .add-corp-form h3 {
     margin-top: 0;
-    color: var(--bs-body-color);
-    border-bottom: 2px solid var(--ci-bg-primary);
+    color: var(--ci-text-body);
+    border-bottom: 2px solid var(--ci-primary);
     padding-bottom: 10px;
     margin-bottom: 20px;
 }
@@ -202,17 +252,17 @@
 .corp-inv-log {
     max-height: 400px;
     overflow-y: auto;
-    background: var(--bs-secondary-bg, #f8f9fa);
+    background: var(--ci-bg-secondary);
+    color: var(--ci-text-body);
     padding: 10px;
     border-radius: 4px;
     font-size: 12px;
     border: 1px solid var(--ci-border);
-    color: var(--bs-body-color);
 }
 
 .corp-inv-code {
-    background: var(--bs-body-bg, #1e1e1e);
-    color: var(--bs-body-color, #f8f8f2);
+    background: var(--ci-bg-secondary);
+    color: var(--ci-text-body);
     padding: 10px;
     border-radius: 4px;
     border: 1px solid var(--ci-border);
@@ -263,7 +313,7 @@
 
 .loading-spinner .fa-spin {
     font-size: 48px;
-    color: var(--ci-bg-primary);
+    color: var(--ci-primary);
 }
 
 /* Alerts and Messages */
@@ -274,6 +324,7 @@
 /* Item Details */
 .item-details {
     background: var(--ci-bg-body);
+    color: var(--ci-text-body);
     padding: 20px;
     border-radius: 4px;
     border: 1px solid var(--ci-border);
@@ -308,12 +359,13 @@
 }
 
 .info-value {
-    color: var(--bs-body-color);
+    color: var(--ci-text-body);
 }
 
 /* Statistics Charts */
 .chart-container {
     background: var(--ci-bg-body);
+    color: var(--ci-text-body);
     padding: 20px;
     border-radius: 4px;
     border: 1px solid var(--ci-border);
@@ -354,7 +406,7 @@
 }
 
 .badge-corp {
-    background: var(--ci-bg-primary);
+    background: var(--ci-primary);
     color: white;
     padding: 3px 8px;
     border-radius: 3px;
