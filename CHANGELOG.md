@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.22] - 2026-02-18
+
+### Performance
+- **Market prices cached in Redis for 2 hours** — `PriceManager.get_market_prices()` was downloading ~40,000 ESI price records on *every* sync run (every 30 min). Now fetched once and cached; subsequent syncs serve from Redis instantly
+- **Type-name lookups: DB first, ESI only for new types** — previously made one ESI HTTP call per unique item type in the hangar on every sync (could be 500–1000+ calls). Now queries existing `HangarItem` records for known type names; ESI is only called for types never seen before
+- **Bulk DB writes in `process_assets`** — replaced per-item `save()` / `create()` / individual `create_transaction()` calls with `bulk_update`, `bulk_create`, and batched `bulk_create` for transactions. Reduces DB round-trips from O(N items) to O(1) per sync
+- **Divisions prefetched** — eliminated per-asset `HangarDivision.objects.filter().first()` query inside the loop; division map now loaded once before processing
+- **`HangarSnapshot.snapshot_data` no longer stores full JSON blobs** — the field was duplicating all `HangarItem` data on every sync row, growing indefinitely. New syncs write `{}`. Migration 0006 clears existing blobs
+- **Alert task skipped when no rules exist** — `process_alert_rules` task is no longer dispatched if the corporation has zero active alert rules
+- **Daily cleanup task** (`cleanup_old_data`) registered in Celery Beat — keeps last 48 snapshots per corp (24 h), deletes transactions older than 90 days
+
 ## [0.1.21] - 2026-02-18
 
 ### Fixed

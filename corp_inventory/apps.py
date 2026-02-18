@@ -23,9 +23,8 @@ class CorpInventoryConfig(AppConfig):
     @staticmethod
     def _register_beat_schedule():
         """
-        Auto-create the periodic Celery Beat task for sync_all_corporations
-        if django-celery-beat is installed and the DB is ready.
-        The interval is controlled by CORPINVENTORY_SYNC_INTERVAL (default 30 min).
+        Auto-create the periodic Celery Beat tasks if django-celery-beat is
+        installed and the DB is ready.
         """
         try:
             from django_celery_beat.models import PeriodicTask, IntervalSchedule
@@ -33,7 +32,7 @@ class CorpInventoryConfig(AppConfig):
 
             interval_minutes = app_settings.CORPINVENTORY_SYNC_INTERVAL
 
-            schedule, _ = IntervalSchedule.objects.get_or_create(
+            sync_schedule, _ = IntervalSchedule.objects.get_or_create(
                 every=interval_minutes,
                 period=IntervalSchedule.MINUTES,
             )
@@ -42,12 +41,28 @@ class CorpInventoryConfig(AppConfig):
                 name="Corp Inventory: Sync All Corporations",
                 defaults={
                     "task": "corp_inventory.tasks.sync_all_corporations",
-                    "interval": schedule,
+                    "interval": sync_schedule,
                     "enabled": True,
                 },
             )
+
+            # Daily cleanup: prune old snapshots + transactions (keeps DB lean)
+            daily_schedule, _ = IntervalSchedule.objects.get_or_create(
+                every=1440,
+                period=IntervalSchedule.MINUTES,
+            )
+            PeriodicTask.objects.update_or_create(
+                name="Corp Inventory: Cleanup Old Data",
+                defaults={
+                    "task": "corp_inventory.tasks.cleanup_old_data",
+                    "interval": daily_schedule,
+                    "enabled": True,
+                },
+            )
+
             logger.debug(
-                f"Corp Inventory beat schedule registered: every {interval_minutes} minutes"
+                f"Corp Inventory beat schedule registered: "
+                f"sync every {interval_minutes} min, cleanup daily"
             )
         except Exception:
             # DB may not be ready yet (e.g. during migrations / test setup) — skip silently.

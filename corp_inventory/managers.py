@@ -6,6 +6,7 @@ Handles all ESI API calls for fetching corporation hangar data
 import logging
 from typing import Dict, List, Optional
 
+from django.core.cache import cache
 from esi.clients import EsiClientProvider
 from esi.models import Token
 
@@ -305,29 +306,38 @@ class PriceManager:
     """
     Manages market price lookups for valuation
     """
-    
+
+    _CACHE_KEY = "corp_inventory_market_prices"
+    _CACHE_TIMEOUT = 7200  # 2 hours — ESI prices update roughly every 5 minutes
+                           # but we only need rough valuations; 2-hour staleness is fine
+
     @staticmethod
     def get_market_prices() -> Dict[int, float]:
         """
-        Fetch current market prices for all items
-        
-        Returns:
-            Dictionary mapping type_id to price
+        Fetch current market prices for all items.
+        Results are cached in Redis for 2 hours to avoid re-fetching
+        ~40,000 price records on every sync run.
         """
+        cached = cache.get(PriceManager._CACHE_KEY)
+        if cached is not None:
+            logger.debug(f"Market prices served from cache ({len(cached)} items)")
+            return cached
+
         try:
             client = esi.client
             prices = client.Market.get_markets_prices().results()
-            
+
             price_dict = {}
             for item in prices:
                 if "average_price" in item:
                     price_dict[item["type_id"]] = item["average_price"]
                 elif "adjusted_price" in item:
                     price_dict[item["type_id"]] = item["adjusted_price"]
-            
-            logger.info(f"Retrieved prices for {len(price_dict)} items")
+
+            logger.info(f"Retrieved prices for {len(price_dict)} items — caching for 2 h")
+            cache.set(PriceManager._CACHE_KEY, price_dict, PriceManager._CACHE_TIMEOUT)
             return price_dict
-            
+
         except Exception as e:
             logger.error(f"Error fetching market prices: {e}")
             return {}

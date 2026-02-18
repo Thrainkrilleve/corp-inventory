@@ -27,6 +27,52 @@ from . import app_settings
 logger = logging.getLogger(__name__)
 
 
+@shared_task
+def cleanup_old_data():
+    """
+    Prune old HangarSnapshot and HangarTransaction rows to keep DB lean.
+
+    Keeps only the last 48 snapshots per corporation (48 × 30 min = 24 h of history).
+    Deletes HangarTransaction records older than 90 days.
+    Run daily via Celery Beat.
+    """
+    from django.db.models import OuterRef, Subquery
+
+    corps = Corporation.objects.filter(tracking_enabled=True)
+    total_snaps_deleted = 0
+    total_trans_deleted = 0
+
+    for corp in corps:
+        # Keep the 48 most recent snapshots, delete the rest
+        keep_ids = (
+            HangarSnapshot.objects.filter(corporation=corp)
+            .order_by("-snapshot_time")
+            .values_list("id", flat=True)[:48]
+        )
+        deleted, _ = (
+            HangarSnapshot.objects.filter(corporation=corp)
+            .exclude(id__in=list(keep_ids))
+            .delete()
+        )
+        total_snaps_deleted += deleted
+
+        # Delete transactions older than 90 days
+        cutoff = timezone.now() - timedelta(days=90)
+        deleted, _ = HangarTransaction.objects.filter(
+            corporation=corp, detected_at__lt=cutoff
+        ).delete()
+        total_trans_deleted += deleted
+
+    logger.info(
+        f"cleanup_old_data: removed {total_snaps_deleted} old snapshots, "
+        f"{total_trans_deleted} old transactions"
+    )
+    return {
+        "snapshots_deleted": total_snaps_deleted,
+        "transactions_deleted": total_trans_deleted,
+    }
+
+
 @shared_task(bind=True)
 def sync_all_corporations(self):
     """
@@ -325,16 +371,10 @@ def process_assets(
     token: Token
 ):
     """
-    Process assets and detect changes
-    
-    Args:
-        corporation: Corporation object
-        assets: List of asset dictionaries from ESI
-        market_prices: Dictionary of market prices
-        token: ESI token
+    Process assets and detect changes.
+    Uses bulk_update / bulk_create to avoid N individual DB writes.
     """
     # Build a lookup map for the full asset list so we can walk the parent chain.
-    # Keys are item_id (int).  ESI may return them as int or str – normalise.
     asset_map = {int(a["item_id"]): a for a in assets}
 
     # Filter for hangar items only (location_flag starts with 'CorpSAG')
@@ -342,95 +382,115 @@ def process_assets(
         asset for asset in assets
         if asset.get("location_flag", "").startswith("CorpSAG")
     ]
-    
+
     logger.info(f"Processing {len(hangar_assets)} hangar assets")
-    
-    # Build snapshot data
-    current_snapshot = {}
+
+    # ------------------------------------------------------------------ #
+    # 1. Resolve station/structure IDs and collect unique location/type IDs
+    # ------------------------------------------------------------------ #
+    asset_resolved_location: dict = {}
     locations_to_fetch = set()
     types_to_fetch = set()
-    
-    # First pass: resolve the real station/structure for each hangar asset and
-    # collect all unique location IDs that need to be fetched.
-    asset_resolved_location: dict = {}  # item_id -> resolved station/structure id
+
     for asset in hangar_assets:
         item_id = int(asset["item_id"])
         station_id = resolve_station_id(item_id, asset_map)
         asset_resolved_location[item_id] = station_id
         locations_to_fetch.add(station_id)
         types_to_fetch.add(asset["type_id"])
-    
+
     logger.info(
         f"Resolved {len(hangar_assets)} hangar assets to "
-        f"{len(locations_to_fetch)} unique station(s)/structure(s): {locations_to_fetch}"
+        f"{len(locations_to_fetch)} unique location(s)"
     )
 
-    # Fetch and cache location data
+    # ------------------------------------------------------------------ #
+    # 2. Fetch location objects (cached in DB after first lookup)
+    # ------------------------------------------------------------------ #
     location_cache = {}
     for loc_id in locations_to_fetch:
         location = get_or_create_location(loc_id, token)
         if location:
             location_cache[loc_id] = location
-    
-    # Fetch and cache type data
-    type_cache = {}
-    for type_id in types_to_fetch:
-        type_info = CorpInventoryManager.get_type_info(type_id)
-        if type_info:
-            type_cache[type_id] = type_info.get("name", f"Unknown Type {type_id}")
-    
-    # Mark all existing items as inactive
+
+    # ------------------------------------------------------------------ #
+    # 3. Build type-name cache — DB first, ESI only for unknowns
+    #    This avoids an ESI HTTP call for every type already seen before.
+    # ------------------------------------------------------------------ #
+    known_type_names = dict(
+        HangarItem.objects.filter(type_id__in=types_to_fetch)
+        .values_list('type_id', 'type_name')
+        .distinct()
+    )
+    type_cache = known_type_names.copy()
+    unknown_types = types_to_fetch - set(type_cache.keys())
+    if unknown_types:
+        logger.info(f"Fetching {len(unknown_types)} new type name(s) from ESI")
+        for type_id in unknown_types:
+            type_info = CorpInventoryManager.get_type_info(type_id)
+            if type_info:
+                type_cache[type_id] = type_info.get("name", f"Unknown Type {type_id}")
+
+    # ------------------------------------------------------------------ #
+    # 4. Prefetch all existing HangarItems and divisions into memory
+    # ------------------------------------------------------------------ #
+    existing_items = {
+        item.item_id: item
+        for item in HangarItem.objects.filter(corporation=corporation)
+    }
+    divisions_map = {
+        div.division_id: div
+        for div in HangarDivision.objects.filter(corporation=corporation)
+    }
+
+    # ------------------------------------------------------------------ #
+    # 5. Mark all existing items inactive (single bulk UPDATE)
+    # ------------------------------------------------------------------ #
     HangarItem.objects.filter(
         corporation=corporation,
         is_active=True
     ).update(is_active=False)
-    
-    # Process each asset
+
+    # ------------------------------------------------------------------ #
+    # 6. Build lists for bulk writes
+    # ------------------------------------------------------------------ #
+    items_to_update = []
+    items_to_create = []
+    transactions_to_create = []
+    current_snapshot = {}
+
     for asset in hangar_assets:
         item_id = int(asset["item_id"])
         type_id = asset["type_id"]
         quantity = asset.get("quantity", 1)
-        location_id = asset["location_id"]
-        
-        # Get location – use the resolved station/structure id, not the raw
-        # location_id from ESI (which for CorpSAG items points to the office item).
-        resolved_loc_id = asset_resolved_location.get(item_id, location_id)
+
+        resolved_loc_id = asset_resolved_location.get(item_id, asset["location_id"])
         location = location_cache.get(resolved_loc_id)
         if not location:
             logger.warning(
-                f"Skipping asset {item_id} – no location data for "
-                f"resolved_id={resolved_loc_id} (raw location_id={location_id})"
+                f"Skipping asset {item_id} – no location for resolved_id={resolved_loc_id}"
             )
             continue
-        
-        # Get type name
+
         type_name = type_cache.get(type_id, f"Unknown Type {type_id}")
-        
-        # Get division if available
+
         division = None
         location_flag = asset.get("location_flag", "")
         if location_flag.startswith("CorpSAG"):
             try:
                 div_num = int(location_flag.replace("CorpSAG", ""))
-                division = HangarDivision.objects.filter(
-                    corporation=corporation,
-                    division_id=div_num
-                ).first()
-            except (ValueError, HangarDivision.DoesNotExist):
+                division = divisions_map.get(div_num)
+            except ValueError:
                 pass
-        
-        # Calculate estimated value
+
         unit_price = market_prices.get(type_id, 0)
         estimated_value = Decimal(str(unit_price)) * quantity
-        
-        # Check if item exists
-        try:
-            hangar_item = HangarItem.objects.get(item_id=item_id)
-            old_quantity = hangar_item.quantity
-            
-            # Detect quantity change
+
+        existing = existing_items.get(item_id)
+        if existing:
+            old_quantity = existing.quantity
             if old_quantity != quantity:
-                create_transaction(
+                transactions_to_create.append(HangarTransaction(
                     corporation=corporation,
                     transaction_type="CHANGE",
                     type_id=type_id,
@@ -441,19 +501,15 @@ def process_assets(
                     location=location,
                     division=division,
                     estimated_value=estimated_value,
-                )
-            
-            # Update item
-            hangar_item.quantity = quantity
-            hangar_item.estimated_value = estimated_value
-            hangar_item.location = location
-            hangar_item.division = division
-            hangar_item.is_active = True
-            hangar_item.save()
-            
-        except HangarItem.DoesNotExist:
-            # New item detected
-            hangar_item = HangarItem.objects.create(
+                ))
+            existing.quantity = quantity
+            existing.estimated_value = estimated_value
+            existing.location = location
+            existing.division = division
+            existing.is_active = True
+            items_to_update.append(existing)
+        else:
+            items_to_create.append(HangarItem(
                 corporation=corporation,
                 item_id=item_id,
                 type_id=type_id,
@@ -465,10 +521,8 @@ def process_assets(
                 is_singleton=bool(asset.get("is_singleton")),
                 is_blueprint_copy=bool(asset.get("is_blueprint_copy")),
                 is_active=True,
-            )
-            
-            # Create addition transaction
-            create_transaction(
+            ))
+            transactions_to_create.append(HangarTransaction(
                 corporation=corporation,
                 transaction_type="ADD",
                 type_id=type_id,
@@ -479,24 +533,33 @@ def process_assets(
                 location=location,
                 division=division,
                 estimated_value=estimated_value,
-            )
-        
-        # Add to snapshot
+            ))
+
         current_snapshot[item_id] = {
             "type_id": type_id,
-            "type_name": type_name,
             "quantity": quantity,
             "value": float(estimated_value),
         }
-    
-    # Check for removed items (items that are now inactive)
-    removed_items = HangarItem.objects.filter(
-        corporation=corporation,
-        is_active=False
-    )
-    
-    for item in removed_items:
-        create_transaction(
+
+    # ------------------------------------------------------------------ #
+    # 7. Bulk write items
+    # ------------------------------------------------------------------ #
+    if items_to_update:
+        HangarItem.objects.bulk_update(
+            items_to_update,
+            ['quantity', 'estimated_value', 'location', 'division', 'is_active'],
+            batch_size=500,
+        )
+    if items_to_create:
+        HangarItem.objects.bulk_create(items_to_create, batch_size=500, ignore_conflicts=True)
+
+    # ------------------------------------------------------------------ #
+    # 8. REMOVE transactions for items no longer in ESI (still is_active=False)
+    # ------------------------------------------------------------------ #
+    for item in HangarItem.objects.filter(
+        corporation=corporation, is_active=False
+    ).select_related('location', 'division').iterator(chunk_size=200):
+        transactions_to_create.append(HangarTransaction(
             corporation=corporation,
             transaction_type="REMOVE",
             type_id=item.type_id,
@@ -507,21 +570,33 @@ def process_assets(
             location=item.location,
             division=item.division,
             estimated_value=item.estimated_value,
-        )
-    
-    # Create snapshot
-    total_value = sum(item["value"] for item in current_snapshot.values())
+        ))
+
+    # ------------------------------------------------------------------ #
+    # 9. Bulk create all transactions
+    # ------------------------------------------------------------------ #
+    if transactions_to_create:
+        HangarTransaction.objects.bulk_create(transactions_to_create, batch_size=500)
+
+    # ------------------------------------------------------------------ #
+    # 10. Snapshot — store totals only; skip the full JSON blob which
+    #     duplicates all HangarItem data and grows indefinitely
+    # ------------------------------------------------------------------ #
+    total_value = sum(v["value"] for v in current_snapshot.values())
     HangarSnapshot.objects.create(
         corporation=corporation,
         total_items=len(current_snapshot),
         total_value=Decimal(str(total_value)),
-        snapshot_data=current_snapshot,
+        snapshot_data={},
     )
-    
-    # Process alert rules
-    process_alert_rules.delay(corporation.corporation_id)
-    
-    return len(current_snapshot)  # Return count of items processed
+
+    # ------------------------------------------------------------------ #
+    # 11. Only dispatch alert task if there are active rules to evaluate
+    # ------------------------------------------------------------------ #
+    if AlertRule.objects.filter(corporation=corporation, is_active=True).exists():
+        process_alert_rules.delay(corporation.corporation_id)
+
+    return len(current_snapshot)
 
 
 def get_or_create_location(location_id: int, token: Token) -> Location:
