@@ -152,7 +152,7 @@ class Migration(migrations.Migration):
                     max_length=20
                 )),
                 ('type_id', models.IntegerField(blank=True, null=True)),
-                ('type_name', models.CharField(blank=True, max_length=254)),
+                ('type_name', models.CharField(blank=True, default='', max_length=254, null=True)),
                 ('value_threshold', models.DecimalField(blank=True, decimal_places=2, max_digits=20, null=True)),
                 ('quantity_threshold', models.BigIntegerField(blank=True, null=True)),
                 ('is_active', models.BooleanField(default=True)),
@@ -169,26 +169,26 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name='hangaritem',
-            index=models.Index(fields=['corporation', 'is_active'], name='corp_invent_corp_is__idx'),
+            index=models.Index(fields=['corporation', 'is_active']),
         ),
         migrations.AddIndex(
             model_name='hangaritem',
-            index=models.Index(fields=['type_id', 'is_active'], name='corp_invent_type_is__idx'),
+            index=models.Index(fields=['type_id', 'is_active']),
         ),
         migrations.AddIndex(
             model_name='hangartransaction',
-            index=models.Index(fields=['corporation', '-detected_at'], name='corp_invent_corp_dete_idx'),
+            index=models.Index(fields=['corporation', '-detected_at']),
         ),
         migrations.AddIndex(
             model_name='hangartransaction',
-            index=models.Index(fields=['type_id', '-detected_at'], name='corp_invent_type_dete_idx'),
+            index=models.Index(fields=['type_id', '-detected_at']),
         ),
         migrations.AddIndex(
             model_name='hangartransaction',
-            index=models.Index(fields=['character_id', '-detected_at'], name='corp_invent_charc_dete_idx'),
+            index=models.Index(fields=['character_id', '-detected_at']),
         ),
         migrations.AddIndex(
             model_name='hangarsnapshot',
-            index=models.Index(fields=['corporation', '-snapshot_time'], name='corp_invent_corp_snaps_idx'),
+            index=models.Index(fields=['corporation', '-snapshot_time']),
         ),
     ]

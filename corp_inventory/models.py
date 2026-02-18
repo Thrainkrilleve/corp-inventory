@@ -72,9 +72,9 @@ class Location(models.Model):
     
     # System/Region info
     solar_system_id = models.IntegerField(null=True, blank=True)
-    solar_system_name = models.CharField(max_length=100, blank=True)
+    solar_system_name = models.CharField(max_length=100, blank=True, default="")
     region_id = models.IntegerField(null=True, blank=True)
-    region_name = models.CharField(max_length=100, blank=True)
+    region_name = models.CharField(max_length=100, blank=True, default="")
     
     # Metadata
     last_update = models.DateTimeField(auto_now=True)
@@ -286,7 +286,7 @@ class AlertRule(models.Model):
     
     # Optional: specific type to watch
     type_id = models.IntegerField(null=True, blank=True)
-    type_name = models.CharField(max_length=254, blank=True)
+    type_name = models.CharField(max_length=254, blank=True, default="")
     
     # Optional: specific division
     division = models.ForeignKey(
