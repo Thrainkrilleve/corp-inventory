@@ -10,6 +10,11 @@ from django.db import connection
 
 logger = logging.getLogger(__name__)
 
+MIGRATION_0003_RENAME = (
+    "0003_rename_corp_inv_corp_active_idx_"
+    "corp_invent_corpora_da626d_idx_and_more"
+)
+
 
 class Command(BaseCommand):
     help = (
@@ -32,6 +37,17 @@ class Command(BaseCommand):
         )
         self.stdout.write('-' * 50)
 
+        def _table_exists(cursor, table_name):
+            cursor.execute("SHOW TABLES LIKE %s", [table_name])
+            return cursor.fetchone() is not None
+
+        def _index_exists(cursor, table_name, index_name):
+            cursor.execute(
+                f"SHOW INDEX FROM `{table_name}` WHERE Key_name = %s",
+                [index_name],
+            )
+            return cursor.fetchone() is not None
+
         # Check if we have the migration issue
         with connection.cursor() as cursor:
             try:
@@ -40,8 +56,62 @@ class Command(BaseCommand):
                     "WHERE app = 'corp_inventory' AND name LIKE '0002%rename%'"
                 )
                 result = cursor.fetchone()
+
+                cursor.execute(
+                    "SELECT name FROM django_migrations "
+                    "WHERE app = 'corp_inventory' AND name LIKE '0003%rename%'"
+                )
+                has_0003 = cursor.fetchone() is not None
                 
                 if not result:
+                    # No legacy 0002 rename. Check for 0003 rename failure case.
+                    if not has_0003:
+                        if _table_exists(cursor, "corp_inventory_hangaritem"):
+                            legacy_index = "corp_inv_corp_active_idx"
+                            legacy_index_missing = not _index_exists(
+                                cursor,
+                                "corp_inventory_hangaritem",
+                                legacy_index,
+                            )
+                            if legacy_index_missing:
+                                self.stdout.write(
+                                    self.style.WARNING(
+                                        "⚠ 0003 rename migration pending and legacy index is missing."
+                                    )
+                                )
+                                if not options['force']:
+                                    confirm = input(
+                                        'Fake-apply 0003 rename migration now? (y/n): '
+                                    ).strip().lower()
+                                    if confirm != 'y':
+                                        self.stdout.write('Cancelled.')
+                                        return
+
+                                self.stdout.write('Applying 0003 fix...')
+                                call_command(
+                                    'migrate',
+                                    'corp_inventory',
+                                    MIGRATION_0003_RENAME,
+                                    '--fake',
+                                    verbosity=0,
+                                )
+                                self.stdout.write(
+                                    self.style.SUCCESS('✓ 0003 migration marked as applied.')
+                                )
+                                self.stdout.write('Running migrations...')
+                                call_command(
+                                    'migrate',
+                                    'corp_inventory',
+                                    verbosity=1,
+                                )
+                                self.stdout.write('')
+                                self.stdout.write(
+                                    self.style.SUCCESS(
+                                        '✓ Corp Inventory migration issues fixed!'
+                                    )
+                                )
+                                return
+
                     self.stdout.write(
                         self.style.SUCCESS(
                             '✓ No migration issues detected. '
