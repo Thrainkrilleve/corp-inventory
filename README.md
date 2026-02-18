@@ -206,6 +206,17 @@ CORPINVENTORY_ENABLE_NOTIFICATIONS = True
 CORPINVENTORY_ALERT_THRESHOLD = 100000000  # 100M ISK
 ```
 
+### Theme Support
+
+Corp Inventory is fully compatible with Alliance Auth's theme system:
+
+- **Light/Dark Mode**: The app automatically adapts its styling to match your selected theme
+- **aa-gdpr Integration**: Works seamlessly with the aa-gdpr theme module
+- **Custom Themes**: Compatible with any Alliance Auth theme package
+- **Theme Variables**: Uses Bootstrap CSS variables for consistent styling across themes
+
+The app will automatically inherit your alliance's theme colors and dark mode preferences without any additional configuration.
+
 ## Usage
 
 ### Automatic Syncing

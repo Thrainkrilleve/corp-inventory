@@ -10,7 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Automatic corporation detection and tracking when characters authenticate via ESI
 - Signal handler that adds corporations to tracking list when new Director/CEO characters authenticate
-- Eliminates need for manual corporation entry in most cases
+- Theme-aware styling that automatically adapts to the user's selected Alliance Auth theme (light/dark modes)
+- Support for aa-gdpr theme module and other custom Alliance Auth themes
+
+### Changed
+- Redesigned CSS to use Bootstrap CSS variables for theme compatibility
+- Removed all hardcoded colors in favor of theme-aware color system
+- Updated templates to use CSS classes instead of inline styles for better maintainability
 
 ## [0.1.1] - 2026-02-17
 
