@@ -7,20 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-02-17
+
 ### Added
 - Automatic corporation detection and tracking when characters authenticate via ESI
 - Signal handler that adds corporations to tracking list when new Director/CEO characters authenticate
 - Theme-aware styling that automatically adapts to the user's selected Alliance Auth theme (light/dark modes)
 - Support for aa-gdpr theme module and other custom Alliance Auth themes
 - `fix_corp_inventory_migration` management command to automatically resolve migration history conflicts
+- EVE SSO token link on Manage Corporations page
+- Diagnostics command for sync troubleshooting
 
 ### Changed
 - Redesigned CSS to use Bootstrap CSS variables for theme compatibility
 - Removed all hardcoded colors in favor of theme-aware color system
 - Updated templates to use CSS classes instead of inline styles for better maintainability
+- Resolve ESI token add URL via URL reverse for Alliance Auth compatibility
 
 ### Fixed
 - Migration history conflicts from earlier versions now automatically resolved (no more index rename errors)
+- AppConfig default selection for Django 4 to register URL hooks without long app label
 
 ## [0.1.1] - 2026-02-17
 
@@ -69,5 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Division filtering
 - Search functionality
 
-[Unreleased]: https://github.com/yourusername/allianceauth-corp-inventory/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/yourusername/allianceauth-corp-inventory/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/yourusername/allianceauth-corp-inventory/releases/tag/v0.1.2
+[0.1.1]: https://github.com/yourusername/allianceauth-corp-inventory/releases/tag/v0.1.1
 [0.1.0]: https://github.com/yourusername/allianceauth-corp-inventory/releases/tag/v0.1.0
