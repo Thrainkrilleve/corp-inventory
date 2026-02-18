@@ -26,16 +26,31 @@ from . import app_settings
 logger = logging.getLogger(__name__)
 
 
-@shared_task
-def sync_all_corporations():
+@shared_task(bind=True)
+def sync_all_corporations(self):
     """
-    Sync all tracked corporations
+    Sync all tracked corporations.
+    Dispatches one sync_corporation_hangar task per enabled corporation.
+    Returns a summary dict so Celery Beat / task results show useful info.
     """
     corporations = Corporation.objects.filter(tracking_enabled=True)
-    logger.info(f"Syncing {corporations.count()} corporations")
-    
+    corp_count = corporations.count()
+    logger.info(f"sync_all_corporations: dispatching sync for {corp_count} corporation(s)")
+
+    if corp_count == 0:
+        msg = "No corporations with tracking_enabled=True found in the database."
+        logger.warning(msg)
+        return {"status": "warning", "message": msg, "dispatched": 0}
+
+    dispatched = []
     for corp in corporations:
         sync_corporation_hangar.delay(corp.corporation_id)
+        dispatched.append(corp.corporation_name)
+        logger.info(f"  → queued sync for {corp.corporation_name} ({corp.corporation_id})")
+
+    msg = f"Dispatched sync for: {', '.join(dispatched)}"
+    logger.info(msg)
+    return {"status": "success", "message": msg, "dispatched": corp_count}
 
 
 @shared_task
@@ -365,8 +380,8 @@ def process_assets(
                 division=division,
                 quantity=quantity,
                 estimated_value=estimated_value,
-                is_singleton=asset.get("is_singleton", False),
-                is_blueprint_copy=asset.get("is_blueprint_copy", False),
+                is_singleton=bool(asset.get("is_singleton")),
+                is_blueprint_copy=bool(asset.get("is_blueprint_copy")),
                 is_active=True,
             )
             
