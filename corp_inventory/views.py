@@ -401,6 +401,7 @@ def manage_corporations(request):
         "/auth/eveauth/",
     )
     for url_name in (
+        "authentication:add_character",
         "esi:token_add",
         "esi:character_add",
         "eveonline:token_add",
