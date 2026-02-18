@@ -241,7 +241,7 @@ class HangarSnapshot(models.Model):
         related_name="snapshots"
     )
     
-    snapshot_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    snapshot_time = models.DateTimeField(default=timezone.now, db_index=True)
     total_items = models.IntegerField(default=0)
     total_value = models.DecimalField(
         max_digits=20,
