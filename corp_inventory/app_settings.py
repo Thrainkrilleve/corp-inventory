@@ -8,6 +8,7 @@ from django.conf import settings
 CORPINVENTORY_ESI_SCOPES = [
     "esi-assets.read_corporation_assets.v1",
     "esi-corporations.read_divisions.v1",
+    "esi-universe.read_structures.v1",  # Required for structure names
 ]
 
 # How often to sync hangar data (in minutes)
