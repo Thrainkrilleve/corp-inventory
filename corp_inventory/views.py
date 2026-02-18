@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.db.models import Sum, Count, Q
 from django.http import JsonResponse
+from django.urls import NoReverseMatch, reverse
 from django.utils import timezone
 from datetime import timedelta
 
@@ -394,9 +395,18 @@ def manage_corporations(request):
     # GET request - show all corporations
     corporations = Corporation.objects.all().order_by('-tracking_enabled', 'corporation_name')
     
+    esi_token_url = app_settings.CORPINVENTORY_ESI_TOKEN_URL
+    for url_name in ("eveonline:token_add", "eveonline:character_add"):
+        try:
+            esi_token_url = reverse(url_name)
+            break
+        except NoReverseMatch:
+            continue
+
     context = {
         'corporations': corporations,
         'title': 'Manage Corporations',
+        'esi_token_url': esi_token_url,
     }
     
     return render(request, 'corp_inventory/manage_corporations.html', context)
