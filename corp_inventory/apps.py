@@ -5,6 +5,7 @@ class CorpInventoryConfig(AppConfig):
     name = "corp_inventory"
     label = "corp_inventory"
     verbose_name = "Corp Inventory"
+    default = True
     
     def ready(self):
         """Register signal handlers, admin, and hooks"""

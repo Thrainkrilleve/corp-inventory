@@ -24,4 +24,3 @@ __universe_operations__ = [
     "GetUniverseTypesTypeId",
 ]
 
-default_app_config = "corp_inventory.apps.CorpInventoryConfig"
