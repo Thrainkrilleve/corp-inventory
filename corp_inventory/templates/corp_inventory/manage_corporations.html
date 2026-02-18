@@ -8,6 +8,17 @@
         <div class="col-md-12">
             <h1><i class="fas fa-building"></i> Manage Corporations</h1>
             <p class="lead">Add or remove corporations for hangar tracking</p>
+            <div class="btn-group" role="group">
+                <a href="{% url 'corp_inventory:index' %}" class="btn btn-default btn-sm">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="{% url 'corp_inventory:manage_corporations' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-building"></i> Manage Corps
+                </a>
+                <a href="{% url 'corp_inventory:logs' %}" class="btn btn-default btn-sm">
+                    <i class="fas fa-stethoscope"></i> Diagnostics
+                </a>
+            </div>
         </div>
     </div>
 
@@ -19,7 +30,7 @@
                 <form method="post" action="{% url 'corp_inventory:manage_corporations' %}">
                     {% csrf_token %}
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-5">
                             <div class="form-group">
                                 <label for="corporation_id">Corporation ID *</label>
                                 <input 
@@ -33,7 +44,7 @@
                                 <small class="text-muted">You can find this in-game or via ESI</small>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-5">
                             <div class="form-group">
                                 <label for="corporation_name">Corporation Name *</label>
                                 <input 
@@ -43,19 +54,6 @@
                                     name="corporation_name" 
                                     required
                                     placeholder="e.g., Deep Core Mining Inc."
-                                >
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label for="ticker">Ticker</label>
-                                <input 
-                                    type="text" 
-                                    class="form-control" 
-                                    id="ticker" 
-                                    name="ticker" 
-                                    maxlength="10"
-                                    placeholder="e.g., DCORE"
                                 >
                             </div>
                         </div>
@@ -100,12 +98,7 @@
                     <div class="corp-card {% if not corp.tracking_enabled %}inactive{% endif %}">
                         <div class="row">
                             <div class="col-xs-8">
-                                <h4>
-                                    {{ corp.corporation_name }}
-                                    {% if corp.ticker %}
-                                    <span class="ticker">{{ corp.ticker }}</span>
-                                    {% endif %}
-                                </h4>
+                                <h4>{{ corp.corporation_name }}</h4>
                                 <p class="text-muted">
                                     <strong>Corp ID:</strong> {{ corp.corporation_id }}<br>
                                     <strong>Status:</strong> 

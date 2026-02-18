@@ -365,7 +365,6 @@ def add_corp_token(request, token):
                 corporation_id=char.corporation_id,
                 defaults={
                     'corporation_name': char.corporation_name,
-                    'ticker': char.corporation_ticker,
                     'tracking_enabled': True,
                 }
             )
@@ -408,7 +407,6 @@ def manage_corporations(request):
         # Add new corporation
         corp_id = request.POST.get('corporation_id')
         corp_name = request.POST.get('corporation_name')
-        ticker = request.POST.get('ticker', '')
         
         if corp_id and corp_name:
             try:
@@ -416,7 +414,6 @@ def manage_corporations(request):
                     corporation_id=corp_id,
                     defaults={
                         'corporation_name': corp_name,
-                        'ticker': ticker,
                         'tracking_enabled': True,
                     }
                 )
