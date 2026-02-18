@@ -1,0 +1,185 @@
+{% extends "corp_inventory/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block corp_inventory_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1><i class="fas fa-building"></i> Manage Corporations</h1>
+            <p class="lead">Add or remove corporations for hangar tracking</p>
+        </div>
+    </div>
+
+    <!-- Add Corporation Form -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="add-corp-form">
+                <h3><i class="fas fa-plus-circle"></i> Add New Corporation</h3>
+                <form method="post" action="{% url 'corp_inventory:manage_corporations' %}">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="corporation_id">Corporation ID *</label>
+                                <input 
+                                    type="number" 
+                                    class="form-control" 
+                                    id="corporation_id" 
+                                    name="corporation_id" 
+                                    required
+                                    placeholder="e.g., 98000001"
+                                >
+                                <small class="text-muted">You can find this in-game or via ESI</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="corporation_name">Corporation Name *</label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="corporation_name" 
+                                    name="corporation_name" 
+                                    required
+                                    placeholder="e.g., Deep Core Mining Inc."
+                                >
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="ticker">Ticker</label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="ticker" 
+                                    name="ticker" 
+                                    maxlength="10"
+                                    placeholder="e.g., DCORE"
+                                >
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button type="submit" class="btn btn-success btn-block">
+                                    <i class="fas fa-plus"></i> Add Corporation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div class="alert alert-info" style="margin-top: 15px; margin-bottom: 0;">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Note:</strong> After adding a corporation, make sure to add an ESI token with the required scopes for a corporation director or CEO.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Existing Corporations -->
+    <div class="row">
+        <div class="col-md-12">
+            <h3><i class="fas fa-list"></i> Tracked Corporations</h3>
+            
+            {% if not corporations %}
+            <div class="no-data">
+                <i class="fas fa-inbox"></i>
+                <p>No corporations are currently being tracked.</p>
+                <p class="text-muted">Use the form above to add your first corporation.</p>
+            </div>
+            {% else %}
+            <div class="row">
+                {% for corp in corporations %}
+                <div class="col-md-6">
+                    <div class="corp-card {% if not corp.tracking_enabled %}inactive{% endif %}">
+                        <div class="row">
+                            <div class="col-xs-8">
+                                <h4>
+                                    {{ corp.corporation_name }}
+                                    {% if corp.ticker %}
+                                    <span class="ticker">{{ corp.ticker }}</span>
+                                    {% endif %}
+                                </h4>
+                                <p class="text-muted">
+                                    <strong>Corp ID:</strong> {{ corp.corporation_id }}<br>
+                                    <strong>Status:</strong> 
+                                    {% if corp.tracking_enabled %}
+                                        <span class="label label-success">Tracking Enabled</span>
+                                    {% else %}
+                                        <span class="label label-default">Tracking Disabled</span>
+                                    {% endif %}
+                                </p>
+                                {% if corp.last_sync %}
+                                <p class="text-muted">
+                                    <i class="fas fa-clock"></i> 
+                                    Last synced: {{ corp.last_sync|timesince }} ago
+                                </p>
+                                {% else %}
+                                <p class="text-muted">
+                                    <i class="fas fa-exclamation-triangle"></i> 
+                                    Never synced
+                                </p>
+                                {% endif %}
+                            </div>
+                            <div class="col-xs-4 text-right">
+                                <img 
+                                    src="https://images.evetech.net/corporations/{{ corp.corporation_id }}/logo?size=128" 
+                                    alt="{{ corp.corporation_name }}"
+                                    class="img-responsive"
+                                    style="max-width: 80px; margin-left: auto;"
+                                >
+                            </div>
+                        </div>
+                        
+                        <div class="corp-actions">
+                            <a 
+                                href="{% url 'corp_inventory:corporation_hangar' corp.corporation_id %}" 
+                                class="btn btn-primary btn-sm"
+                            >
+                                <i class="fas fa-warehouse"></i> View Hangar
+                            </a>
+                            
+                            <a 
+                                href="{% url 'corp_inventory:sync_corporation' corp.corporation_id %}" 
+                                class="btn btn-info btn-sm btn-sync"
+                                data-corp-id="{{ corp.corporation_id }}"
+                            >
+                                <i class="fas fa-sync"></i> Sync Now
+                            </a>
+                            
+                            {% if corp.tracking_enabled %}
+                            <button 
+                                class="btn btn-warning btn-sm btn-toggle-tracking"
+                                data-corp-id="{{ corp.corporation_id }}"
+                                data-action="disable"
+                            >
+                                <i class="fas fa-pause"></i> Disable Tracking
+                            </button>
+                            {% else %}
+                            <button 
+                                class="btn btn-success btn-sm btn-toggle-tracking"
+                                data-corp-id="{{ corp.corporation_id }}"
+                                data-action="enable"
+                            >
+                                <i class="fas fa-play"></i> Enable Tracking
+                            </button>
+                            {% endif %}
+                            
+                            <a 
+                                href="{% url 'corp_inventory:delete_corporation' corp.corporation_id %}" 
+                                class="btn btn-danger btn-sm btn-delete-corp"
+                                data-corp-name="{{ corp.corporation_name }}"
+                            >
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

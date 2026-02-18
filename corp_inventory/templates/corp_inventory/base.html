@@ -12,94 +12,11 @@
 {% endblock %}
 
 {% block extra_css %}
-<style>
-    .corp-inventory-wrapper {
-        padding: 20px 0;
-    }
-    
-    .stat-card {
-        background: #fff;
-        border-radius: 4px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-    }
-    
-    .stat-card h3 {
-        margin-top: 0;
-        color: #333;
-        font-size: 18px;
-        border-bottom: 2px solid #337ab7;
-        padding-bottom: 10px;
-    }
-    
-    .stat-number {
-        font-size: 32px;
-        font-weight: bold;
-        color: #337ab7;
-    }
-    
-    .stat-label {
-        color: #777;
-        font-size: 14px;
-        text-transform: uppercase;
-    }
-    
-    .isk-value {
-        color: #5cb85c;
-        font-weight: bold;
-    }
-    
-    .transaction-add {
-        color: #5cb85c;
-    }
-    
-    .transaction-remove {
-        color: #d9534f;
-    }
-    
-    .transaction-change {
-        color: #f0ad4e;
-    }
-    
-    .filter-bar {
-        background: #f5f5f5;
-        padding: 15px;
-        border-radius: 4px;
-        margin-bottom: 20px;
-    }
-    
-    .filter-bar .form-group {
-        margin-bottom: 0;
-    }
-    
-    .table-responsive {
-        margin-top: 20px;
-    }
-    
-    .sync-status {
-        font-size: 12px;
-        color: #777;
-    }
-    
-    .sync-status.recent {
-        color: #5cb85c;
-    }
-    
-    .sync-status.old {
-        color: #f0ad4e;
-    }
-    
-    .item-icon {
-        width: 32px;
-        height: 32px;
-        vertical-align: middle;
-        margin-right: 5px;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'corp_inventory/css/corp_inventory.css' %}">
 {% endblock %}
 
 {% block extra_javascript %}
+<script src="{% static 'corp_inventory/js/corp_inventory.js' %}"></script>
 <script>
     // Format ISK values
     function formatISK(value) {

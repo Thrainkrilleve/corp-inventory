@@ -49,4 +49,17 @@ urlpatterns = [
         views.api_hangar_data,
         name='api_hangar_data'
     ),
+    
+    # Corporation management
+    path('manage/', views.manage_corporations, name='manage_corporations'),
+    path(
+        'manage/toggle/<int:corporation_id>/',
+        views.toggle_corporation_tracking,
+        name='toggle_corporation_tracking'
+    ),
+    path(
+        'manage/delete/<int:corporation_id>/',
+        views.delete_corporation,
+        name='delete_corporation'
+    ),
 ]

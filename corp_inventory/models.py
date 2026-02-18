@@ -33,6 +33,7 @@ class Corporation(models.Model):
             ("view_hangar", "Can view corporation hangars"),
             ("view_transactions", "Can view hangar transactions"),
             ("manage_tracking", "Can manage hangar tracking"),
+            ("manage_corporations", "Can add/remove tracked corporations"),
         )
     
     def __str__(self):

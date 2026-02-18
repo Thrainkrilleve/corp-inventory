@@ -5,9 +5,16 @@
 {% block corp_inventory_content %}
 <div class="container">
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-8">
             <h1><i class="fas fa-warehouse"></i> Corp Inventory Dashboard</h1>
             <p class="lead">Track and monitor corporation hangar assets across all locations</p>
+        </div>
+        <div class="col-md-4 text-right">
+            {% if perms.corp_inventory.manage_corporations %}
+            <a href="{% url 'corp_inventory:manage_corporations' %}" class="btn btn-primary" style="margin-top: 20px;">
+                <i class="fas fa-cog"></i> Manage Corporations
+            </a>
+            {% endif %}
         </div>
     </div>
     
@@ -17,7 +24,15 @@
             <div class="alert alert-info">
                 <i class="fas fa-info-circle"></i>
                 <strong>No corporations being tracked.</strong>
+                {% if perms.corp_inventory.manage_corporations %}
+                <p>
+                    <a href="{% url 'corp_inventory:manage_corporations' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Your First Corporation
+                    </a>
+                </p>
+                {% else %}
                 <p>Contact your administrator to set up corporation hangar tracking.</p>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -104,6 +119,11 @@
                     <a href="{% url 'corp_inventory:transactions' %}" class="btn btn-default">
                         <i class="fas fa-list"></i> All Transactions
                     </a>
+                    {% if perms.corp_inventory.manage_corporations %}
+                    <a href="{% url 'corp_inventory:manage_corporations' %}" class="btn btn-default">
+                        <i class="fas fa-cog"></i> Manage Corporations
+                    </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

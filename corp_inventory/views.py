@@ -342,3 +342,102 @@ def api_hangar_data(request, corporation_id):
         })
     
     return JsonResponse({'items': data})
+
+
+@login_required
+@permission_required("corp_inventory.manage_corporations", raise_exception=True)
+def manage_corporations(request):
+    """
+    View to manage tracked corporations
+    """
+    if request.method == 'POST':
+        # Add new corporation
+        corp_id = request.POST.get('corporation_id')
+        corp_name = request.POST.get('corporation_name')
+        ticker = request.POST.get('ticker', '')
+        
+        if corp_id and corp_name:
+            try:
+                corporation, created = Corporation.objects.get_or_create(
+                    corporation_id=corp_id,
+                    defaults={
+                        'corporation_name': corp_name,
+                        'ticker': ticker,
+                        'tracking_enabled': True,
+                    }
+                )
+                
+                if created:
+                    messages.success(
+                        request,
+                        f'Successfully added {corp_name} for tracking!'
+                    )
+                    # Trigger initial sync
+                    sync_corporation_hangar.delay(int(corp_id))
+                else:
+                    messages.info(
+                        request,
+                        f'{corp_name} is already being tracked.'
+                    )
+            except Exception as e:
+                logger.error(f"Error adding corporation: {e}")
+                messages.error(
+                    request,
+                    f'Error adding corporation: {str(e)}'
+                )
+        else:
+            messages.error(request, 'Corporation ID and Name are required.')
+        
+        return redirect('corp_inventory:manage_corporations')
+    
+    # GET request - show all corporations
+    corporations = Corporation.objects.all().order_by('-tracking_enabled', 'corporation_name')
+    
+    context = {
+        'corporations': corporations,
+        'title': 'Manage Corporations',
+    }
+    
+    return render(request, 'corp_inventory/manage_corporations.html', context)
+
+
+@login_required
+@permission_required("corp_inventory.manage_corporations", raise_exception=True)
+def toggle_corporation_tracking(request, corporation_id):
+    """
+    Enable or disable tracking for a corporation
+    """
+    if request.method == 'POST':
+        corporation = get_object_or_404(Corporation, corporation_id=corporation_id)
+        corporation.tracking_enabled = not corporation.tracking_enabled
+        corporation.save()
+        
+        status = 'enabled' if corporation.tracking_enabled else 'disabled'
+        messages.success(
+            request,
+            f'Tracking {status} for {corporation.corporation_name}'
+        )
+        
+        return JsonResponse({'status': 'success'})
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+@login_required
+@permission_required("corp_inventory.manage_corporations", raise_exception=True)
+def delete_corporation(request, corporation_id):
+    """
+    Delete a corporation and all associated data
+    """
+    corporation = get_object_or_404(Corporation, corporation_id=corporation_id)
+    corp_name = corporation.corporation_name
+    
+    # Delete the corporation (cascade will handle related objects)
+    corporation.delete()
+    
+    messages.success(
+        request,
+        f'Successfully removed {corp_name} and all associated data.'
+    )
+    
+    return redirect('corp_inventory:manage_corporations')
