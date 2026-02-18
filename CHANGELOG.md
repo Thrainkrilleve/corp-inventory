@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.23] - 2026-02-18
+
+### Fixed
+- **Container logs page now reachable** — added "Container Logs" navigation button to the hangar page; the page existed but had no link from anywhere in the UI
+- **Container logs: partial pages no longer discarded on network error** — if ESI DNS or connection fails mid-pagination (e.g. page 3 of 4), records already fetched from pages 1-2 are now saved instead of being thrown away and returning an empty result
+
 ## [0.1.22] - 2026-02-18
 
 ### Performance

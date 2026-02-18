@@ -10,6 +10,16 @@
             {{ corporation.corporation_name }} Hangar
         </h1>
         <p class="lead">View all items in corporation hangars</p>
+        <div style="margin-bottom:8px;">
+            <a href="{% url 'corp_inventory:container_logs' corporation.corporation_id %}"
+               class="btn btn-default btn-sm">
+                <i class="fas fa-lock"></i> Container Logs
+            </a>
+            <a href="{% url 'corp_inventory:statistics' corporation.corporation_id %}"
+               class="btn btn-default btn-sm" style="margin-left:6px;">
+                <i class="fas fa-chart-bar"></i> Statistics
+            </a>
+        </div>
     </div>
 </div>
     

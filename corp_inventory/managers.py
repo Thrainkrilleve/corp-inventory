@@ -273,33 +273,33 @@ class CorpInventoryManager:
         Returns:
             List of container log dicts from ESI
         """
-        try:
-            client = esi.client
-            all_logs = []
-            page = 1
-            while True:
+        client = esi.client
+        all_logs = []
+        page = 1
+        while True:
+            try:
                 result = client.Corporation.get_corporations_corporation_id_containers_logs(
                     corporation_id=corporation_id,
                     token=token.valid_access_token(),
                     page=page,
                 ).results()
-                if not result:
-                    break
-                all_logs.extend(result)
-                if len(result) < 1000:
-                    break
-                page += 1
+            except Exception as e:
+                logger.warning(
+                    f"Error fetching container logs page {page} for corporation "
+                    f"{corporation_id}: {e} — returning {len(all_logs)} entries fetched so far"
+                )
+                break
+            if not result:
+                break
+            all_logs.extend(result)
+            if len(result) < 1000:
+                break
+            page += 1
 
-            logger.info(
-                f"Retrieved {len(all_logs)} container log entries for corporation {corporation_id}"
-            )
-            return all_logs
-
-        except Exception as e:
-            logger.error(
-                f"Error fetching container logs for corporation {corporation_id}: {e}"
-            )
-            return []
+        logger.info(
+            f"Retrieved {len(all_logs)} container log entries for corporation {corporation_id}"
+        )
+        return all_logs
 
 
 class PriceManager:
