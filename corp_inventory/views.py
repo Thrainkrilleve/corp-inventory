@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from datetime import timedelta
 
+from . import app_settings
 from .models import (
     Corporation,
     HangarDivision,
@@ -441,3 +442,81 @@ def delete_corporation(request, corporation_id):
     )
     
     return redirect('corp_inventory:manage_corporations')
+
+
+@login_required
+@permission_required("corp_inventory.manage_corporations", raise_exception=True)
+def view_logs(request):
+    """
+    View sync logs and diagnostic information
+    """
+    from esi.models import Token
+    from allianceauth.eveonline.models import EveCharacter
+    import logging.handlers
+    import os
+    
+    corporations = Corporation.objects.all()
+    
+    # Build diagnostic information
+    diagnostics = []
+    for corp in corporations:
+        # Check for valid characters
+        characters = EveCharacter.objects.filter(
+            corporation_id=corp.corporation_id
+        )
+        
+        # Check for valid tokens
+        required_scopes = app_settings.CORPINVENTORY_ESI_SCOPES
+        tokens = Token.objects.filter(
+            character_id__in=characters.values_list('character_id', flat=True)
+        ).require_scopes(required_scopes).require_valid()
+        
+        # Get item and transaction counts
+        item_count = HangarItem.objects.filter(
+            corporation=corp,
+            is_active=True
+        ).count()
+        
+        transaction_count = HangarTransaction.objects.filter(
+            corporation=corp
+        ).count()
+        
+        diagnostics.append({
+            'corporation': corp,
+            'character_count': characters.count(),
+            'token_count': tokens.count(),
+            'has_valid_token': tokens.exists(),
+            'last_sync': corp.last_sync,
+            'tracking_enabled': corp.tracking_enabled,
+            'item_count': item_count,
+            'transaction_count': transaction_count,
+        })
+    
+    # Get recent log entries from the logger
+    log_entries = []
+    try:
+        # Try to get logs from the Django logging handler
+        for handler in logging.getLogger('corp_inventory').handlers:
+            if isinstance(handler, logging.handlers.RotatingFileHandler):
+                log_file = handler.baseFilename
+                if os.path.exists(log_file):
+                    with open(log_file, 'r') as f:
+                        lines = f.readlines()
+                        log_entries = lines[-100:]  # Last 100 lines
+                        log_entries.reverse()
+    except Exception as e:
+        logger.warning(f"Could not read log file: {e}")
+    
+    # Get filter parameters
+    corporation_id = request.GET.get('corporation_id', '')
+    
+    context = {
+        'corporations': corporations,
+        'diagnostics': diagnostics,
+        'corporation_id': corporation_id,
+        'required_scopes': app_settings.CORPINVENTORY_ESI_SCOPES,
+        'log_entries': log_entries,
+        'title': 'Sync Logs & Diagnostics',
+    }
+    
+    return render(request, 'corp_inventory/logs.html', context)

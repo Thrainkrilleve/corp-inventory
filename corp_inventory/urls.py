@@ -62,4 +62,7 @@ urlpatterns = [
         views.delete_corporation,
         name='delete_corporation'
     ),
+    
+    # Diagnostics
+    path('logs/', views.view_logs, name='logs'),
 ]

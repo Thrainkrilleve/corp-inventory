@@ -34,10 +34,24 @@ Track and monitor corporation hangar assets in EVE Online through Alliance Auth.
 - Python >= 3.8
 - Django >= 4.0
 
-### Step 1: Install the Package
+### Step 1: Install from GitHub
+
+**Method 1: Via requirements.txt (Recommended for Production)**
+
+Add to your Alliance Auth `requirements.txt`:
+
+```txt
+# For latest stable release
+git+https://github.com/Thrainkrilleve/corp-inventory.git@main
+
+# Or pin to a specific version (replace v0.1.1 with desired version)
+git+https://github.com/Thrainkrilleve/corp-inventory.git@v0.1.1
+```
+
+Then install:
 
 ```bash
-pip install allianceauth-corp-inventory
+pip install git+https://github.com/Thrainkrilleve/corp-inventory.git
 ```
 
 ### Step 2: Configure Alliance Auth
@@ -56,8 +70,7 @@ INSTALLED_APPS = [
 The app requires the following ESI scopes:
 - `esi-assets.read_corporation_assets.v1`
 - `esi-corporations.read_divisions.v1`
-
-These scopes must be added to your Alliance Auth ESI application.
+- `esi-universe.read_structures.v1`
 
 ### Step 4: Run Migrations
 
@@ -73,23 +86,106 @@ python manage.py collectstatic
 
 ### Step 6: Restart Services
 
-Restart your Alliance Auth supervisord and celery services.
+Restart your Alliance Auth services
 
 ### Step 7: Configure Permissions
 
-Grant permissions to users/groups:
+Grant permissions to users/groups in Alliance Auth admin:
 
 - `corp_inventory.basic_access` - Basic access to the app
 - `corp_inventory.view_hangar` - View corporation hangars
 - `corp_inventory.view_transactions` - View transaction logs
 - `corp_inventory.manage_tracking` - Manage hangar tracking settings
+- `corp_inventory.manage_corporations` - Add/remove tracked corporations
 
 ### Step 8: Set Up Corporations
 
+**Option A: Through the App (Recommended)**
+1. Navigate to Corp Inventory in Alliance Auth
+2. Click "Manage Corporations"
+3. Enter your corporation ID, name, and ticker
+4. Add an ESI token from a corporation Director/CEO character
+5. Click "Sync Now"
+
+**Option B: Through Django Admin**
 1. Log in to Django admin
 2. Navigate to Corp Inventory → Corporations
 3. Add your corporation(s) to track
-4. Enable tracking for each corporation
+4. Ensure a Director/CEO character has added an ESI token
+5. Enable tracking for each corporation
+
+### Step 9: Add ESI Token
+
+**Critical:** You must add an ESI token from a corporation Director or CEO:
+
+1. Have a Director/CEO character authenticate with Alliance Auth
+2. Go to Alliance Auth ESI Tokens page
+3. Add a token with required scopes
+4. The app will automatically find and use this token
+
+## Updating
+
+### Standard Update Process
+
+To update to the latest version:
+
+```bash
+# Update the package
+pip install --upgrade git+https://github.com/Thrainkrilleve/corp-inventory.git
+
+# Run any new migrations
+python manage.py migrate
+
+# Collect new static files
+python manage.py collectstatic --noinput
+
+# Restart services
+supervisorctl restart myauth:
+```
+
+### Docker Update Process
+
+If using Docker/Docker Compose:
+
+```bash
+
+
+#Enter venv
+docker compose exec allianceauth_gunicorn bash
+
+# Run migrations
+auth migrate
+
+# Collect static files
+auth collectstatic --noinput
+
+#exit venv
+exit
+
+# Rebuild containers (picks up new requirements.txt)
+docker compose build
+
+# Restart services
+docker compose restart
+```
+
+### After Updating
+
+1. Check the [CHANGELOG.md](CHANGELOG.md) for any breaking changes
+2. Verify static files are updated: `python manage.py collectstatic`
+3. Visit the **Diagnostics & Logs** page in the app to verify everything is working
+4. Check for any new permissions that need to be granted
+
+### Checking Current Version
+
+In the Django shell:
+
+```python
+python manage.py shell
+
+import corp_inventory
+print(corp_inventory.__version__)
+```
 
 ## Configuration
 
@@ -142,27 +238,137 @@ Transaction logs automatically capture:
 
 The app uses Celery to run periodic sync tasks. Make sure your Alliance Auth Celery beat scheduler is running.
 
-The main task `sync_all_corporations` runs based on the `CORPINVENTORY_SYNC_INTERVAL` setting.
+Add to your `local.py` settings:
+
+```python
+CELERYBEAT_SCHEDULE['corp_inventory_sync'] = {
+    'task': 'corp_inventory.tasks.sync_all_corporations',
+    'schedule': crontab(minute='*/30'),  # Run every 30 minutes
+}
+```
 
 ## Troubleshooting
 
-### No data appearing
+### Use the Built-in Diagnostics Page
 
-1. Verify ESI scopes are correctly configured
-2. Check that a valid token exists for the corporation
-3. Manually trigger a sync from the web interface
-4. Check Celery logs for any errors
+Navigate to **Corp Inventory → Diagnostics & Logs** to check:
+- Valid ESI tokens for each corporation
+- Character authentication status
+- Corporation configuration
+- Last sync times
+- Item and transaction counts
+- Recent log entries
+- Common issues with solutions
 
-### Token issues
+**This should be your first stop when debugging sync issues!**
 
-Make sure corporation directors have authenticated with Alliance Auth and their tokens have the required ESI scopes.
+### Viewing Logs
+
+**In the App:**
+- Go to Corp Inventory → Diagnostics & Logs
+- Scroll to "Recent Log Entries" section
+- Shows last 100 log lines from the app
+
+**Via Command Line:**
+
+```bash
+# Docker
+docker logs -f allianceauth_beat
+docker logs -f allianceauth_worker
+
+# Systemd
+journalctl -u allianceauth-beat -f
+journalctl -u allianceauth-worker -f
+
+# Django logs (if file logging enabled)
+tail -f /path/to/your/logs/django.log
+```
+
+**Manual Test Sync:**
+
+```bash
+python manage.py shell
+
+from corp_inventory.tasks import sync_all_corporations
+sync_all_corporations()
+# Watch output for errors
+```
+
+### Common Issues
+
+1. **No valid token found**
+   - A Corporation Director or CEO must authenticate with Alliance Auth
+   - They must add an ESI token with all required scopes:
+     - `esi-assets.read_corporation_assets.v1`
+     - `esi-corporations.read_divisions.v1`
+     - `esi-universe.read_structures.v1`
+   - Token must not be expired
+   - **Fix:** Have Director/CEO add token via Alliance Auth dashboard
+
+2. **No characters found**
+   - No one from the corporation has authenticated with Alliance Auth
+   - **Fix:** Have a Director/CEO log in and add their character
+
+3. **Sync completes but no items appear**
+   - Check that items are in corporation hangars (not personal hangars)
+   - Items must be in CorpSAG1-7 divisions
+   - Items in containers may not appear
+   - Check the diagnostics page for item counts
+   - **Fix:** View diagnostics page, check logs for ESI errors
+
+4. **"Items in Database: 0" after sync**
+   - Token may not have correct permissions
+   - Character may not be a Director/CEO
+   - Corporation may genuinely have empty hangars
+   - **Fix:** Check diagnostics page, verify token scopes
+
+5. **Static files not loading (CSS/JS broken)**
+   - Run `python manage.py collectstatic`
+   - Restart your web server
+   - Check static files configuration in `local.py`
+   - The diagnostics page will show if tokens are valid
+
+### No Items Appearing
+
+1. **Verify items are in corporation hangars**
+   - Items must be in CorpSAG1-7 (corporation hangars)
+   - Items in containers or personal hangars won't appear
+
+2. **Check sync status**
+   - Use the Diagnostics page to verify sync completed successfully
+   - Look for error messages in the diagnostics
+
+3. **Database migration issue**
+   - Early versions had a migration bug with `division_id`
+   - If you installed before the fix, run: `python manage.py migrate corp_inventory --fake-initial`
+   - Then run: `python manage.py migrate corp_inventory`
+
+### Token/Permission Issues
+
+**Token expired or invalid:**
+- Have the character owner log out and back into Alliance Auth
+- Re-add their ESI token with all required scopes
+- Check the Diagnostics page to verify token is valid
+
+**Missing ESI scopes:**
+Required scopes:
+- `esi-assets.read_corporation_assets.v1`
+- `esi-corporations.read_divisions.v1`
+- `esi-universe.read_structures.v1`
 
 ### Performance
 
-For large inventories (10,000+ items), consider:
-- Increasing the sync interval
-- Adding database indexes
-- Using Django's cache framework
+For large inventories (10,000+ items):
+- Increase `CORPINVENTORY_SYNC_INTERVAL` to reduce frequency
+- Consider adding database indexes (already included in migrations)
+- Monitor Celery worker performance
+
+### Getting Help
+
+1. Check the **Diagnostics** page in the app
+2. Review Django logs for detailed error messages  
+3. Check Celery logs: `tail -f /path/to/logs/celery.log`
+4. Open an issue on GitHub with diagnostic information
 
 ## Development
 

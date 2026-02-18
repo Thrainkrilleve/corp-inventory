@@ -45,19 +45,24 @@ def sync_corporation_hangar(corporation_id: int):
     
     Args:
         corporation_id: Corporation ID to sync
+        
+    Returns:
+        Dict with sync status and message
     """
     try:
         corporation = Corporation.objects.get(corporation_id=corporation_id)
         
         if not corporation.tracking_enabled:
-            logger.info(f"Skipping disabled corporation {corporation.corporation_name}")
-            return
+            msg = f"Skipping disabled corporation {corporation.corporation_name}"
+            logger.info(msg)
+            return {"status": "skipped", "message": msg}
         
         # Get a valid token for this corporation
         token = get_corporation_token(corporation_id)
         if not token:
-            logger.error(f"No valid token found for corporation {corporation_id}")
-            return
+            msg = f"No valid token found for corporation {corporation_id}"
+            logger.error(msg)
+            return {"status": "error", "message": msg}
         
         logger.info(f"Starting sync for {corporation.corporation_name}")
         
@@ -67,26 +72,35 @@ def sync_corporation_hangar(corporation_id: int):
         # Fetch and process assets
         assets = CorpInventoryManager.get_corporation_assets(token, corporation_id)
         if not assets:
-            logger.warning(f"No assets returned for {corporation.corporation_name}")
-            return
+            msg = f"No assets returned for {corporation.corporation_name}"
+            logger.warning(msg)
+            corporation.last_sync = timezone.now()
+            corporation.save()
+            return {"status": "warning", "message": msg, "assets_count": 0}
         
         # Get market prices for valuation
         market_prices = PriceManager.get_market_prices()
         
         # Process assets and detect changes
         with transaction.atomic():
-            process_assets(corporation, assets, market_prices, token)
+            items_count = process_assets(corporation, assets, market_prices, token)
         
         # Update last sync time
         corporation.last_sync = timezone.now()
         corporation.save()
         
-        logger.info(f"Completed sync for {corporation.corporation_name}")
+        msg = f"Completed sync for {corporation.corporation_name} - {items_count} items processed"
+        logger.info(msg)
+        return {"status": "success", "message": msg, "assets_count": items_count}
         
     except Corporation.DoesNotExist:
-        logger.error(f"Corporation {corporation_id} not found")
+        msg = f"Corporation {corporation_id} not found"
+        logger.error(msg)
+        return {"status": "error", "message": msg}
     except Exception as e:
-        logger.error(f"Error syncing corporation {corporation_id}: {e}", exc_info=True)
+        msg = f"Error syncing corporation {corporation_id}: {str(e)}"
+        logger.error(msg, exc_info=True)
+        return {"status": "error", "message": msg}
 
 
 def get_corporation_token(corporation_id: int) -> Token:
@@ -342,6 +356,8 @@ def process_assets(
     
     # Process alert rules
     process_alert_rules.delay(corporation.corporation_id)
+    
+    return len(current_snapshot)  # Return count of items processed
 
 
 def get_or_create_location(location_id: int, token: Token) -> Location:

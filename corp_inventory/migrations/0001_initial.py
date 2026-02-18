@@ -37,15 +37,15 @@ class Migration(migrations.Migration):
             name='HangarDivision',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('division', models.IntegerField()),
-                ('name', models.CharField(blank=True, max_length=255, null=True)),
+                ('division_id', models.IntegerField()),
+                ('division_name', models.CharField(max_length=100)),
                 ('corporation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='divisions', to='corp_inventory.corporation')),
             ],
             options={
                 'verbose_name': 'Hangar Division',
                 'verbose_name_plural': 'Hangar Divisions',
-                'ordering': ['corporation', 'division'],
-                'unique_together': {('corporation', 'division')},
+                'ordering': ['corporation', 'division_id'],
+                'unique_together': {('corporation', 'division_id')},
             },
         ),
         migrations.CreateModel(

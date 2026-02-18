@@ -1,0 +1,261 @@
+{% extends "corp_inventory/base.html" %}
+{% load i18n %}
+
+{% block corp_inventory_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1><i class="fas fa-stethoscope"></i> Sync Diagnostics</h1>
+            <p class="lead">Troubleshoot sync issues and verify configuration</p>
+        </div>
+    </div>
+
+    <!-- Required Scopes -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><i class="fas fa-key"></i> Required ESI Scopes</h3>
+                </div>
+                <div class="panel-body">
+                    <p>Characters need tokens with the following scopes:</p>
+                    <ul>
+                        {% for scope in required_scopes %}
+                        <li><code>{{ scope }}</code></li>
+                        {% endfor %}
+                    </ul>
+                    <p class="text-muted">
+                        <strong>Note:</strong> Tokens must be from a character who is a Director or CEO of the corporation.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Corporation Diagnostics -->
+    <div class="row">
+        <div class="col-md-12">
+            <h3><i class="fas fa-heartbeat"></i> Corporation Status</h3>
+            
+            {% if not diagnostics %}
+            <div class="no-data">
+                <i class="fas fa-inbox"></i>
+                <p>No corporations configured.</p>
+            </div>
+            {% else %}
+            {% for diag in diagnostics %}
+            <div class="panel {% if diag.has_valid_token and diag.tracking_enabled %}panel-success{% elif diag.tracking_enabled %}panel-warning{% else %}panel-default{% endif %}">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <i class="fas fa-building"></i> {{ diag.corporation.corporation_name }}
+                        {% if not diag.tracking_enabled %}
+                        <span class="label label-default pull-right">Tracking Disabled</span>
+                        {% elif diag.has_valid_token %}
+                        <span class="label label-success pull-right">OK</span>
+                        {% else %}
+                        <span class="label label-danger pull-right">Configuration Error</span>
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Configuration</h5>
+                            <table class="table table-condensed">
+                                <tr>
+                                    <th>Corporation ID:</th>
+                                    <td>{{ diag.corporation.corporation_id }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Tracking Enabled:</th>
+                                    <td>
+                                        {% if diag.tracking_enabled %}
+                                        <span class="label label-success">Yes</span>
+                                        {% else %}
+                                        <span class="label label-default">No</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Last Sync:</th>
+                                    <td>
+                                        {% if diag.last_sync %}
+                                        {{ diag.last_sync|date:"Y-m-d H:i:s" }}
+                                        ({{ diag.last_sync|timesince }} ago)
+                                        {% else %}
+                                        <span class="text-muted">Never</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Token Status</h5>
+                            <table class="table table-condensed">
+                                <tr>
+                                    <th>Characters Found:</th>
+                                    <td>
+                                        {% if diag.character_count > 0 %}
+                                        <span class="label label-success">{{ diag.character_count }}</span>
+                                        {% else %}
+                                        <span class="label label-danger">0</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Valid Tokens:</th>
+                                    <td>
+                                        {% if diag.token_count > 0 %}
+                                        <span class="label label-success">{{ diag.token_count }}</span>
+                                        {% else %}
+                                        <span class="label label-danger">0</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Can Sync:</th>
+                                    <td>
+                                        {% if diag.has_valid_token %}
+                                        <span class="label label-success">Yes</span>
+                                        {% else %}
+                                        <span class="label label-danger">No - Add Token</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Items in Database:</th>
+                                    <td>{{ diag.item_count|default:"0" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Transactions Logged:</th>
+                                    <td>{{ diag.transaction_count|default:"0" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    {% if not diag.has_valid_token and diag.tracking_enabled %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Action Required:</strong>
+                        <ol>
+                            <li>Have a corporation Director or CEO character authenticate with Alliance Auth</li>
+                            <li>Add an ESI token with the required scopes (see above)</li>
+                            <li>Click "Sync Now" to start syncing</li>
+                        </ol>
+                    </div>
+                    {% elif not diag.character_count %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>No characters found:</strong>
+                        No characters from this corporation have authenticated with Alliance Auth.
+                    </div>
+                    {% endif %}
+                    
+                    <div class="corp-actions" style="margin-top: 15px;">
+                        <a href="{% url 'corp_inventory:corporation_hangar' diag.corporation.corporation_id %}" 
+                           class="btn btn-primary btn-sm">
+                            <i class="fas fa-warehouse"></i> View Hangar
+                        </a>
+                        <a href="{% url 'corp_inventory:sync_corporation' diag.corporation.corporation_id %}" 
+                           class="btn btn-warning btn-sm">
+                            <i class="fas fa-sync"></i> Sync Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><i class="fas fa-question-circle"></i> Troubleshooting Guide</h3>
+                </div>
+                <div class="panel-body">
+                    <h5>Common Issues:</h5>
+                    <dl>
+                        <dt>No valid tokens found</dt>
+                        <dd>
+                            Make sure a corporation Director or CEO has:
+                            <ul>
+                                <li>Authenticated their character with Alliance Auth</li>
+                                <li>Added an ESI token through the Alliance Auth dashboard</li>
+                                <li>The token has all required scopes (see above)</li>
+                                <li>The token is not expired</li>
+                            </ul>
+                        </dd>
+                        
+                        <dt>Sync completes but no items appear</dt>
+                        <dd>
+                            Check:
+                            <ul>
+                                <li>The corporation actually has items in hangars (not containers)</li>
+                                <li>Items are in corporation hangars (CorpSAG1-7), not personal hangars</li>
+                                <li>Check the logs below for errors</li>
+                            </ul>
+                        </dd>
+                        
+                        <dt>Token errors during sync</dt>
+                        <dd>
+                            The token may have expired or been revoked. Have the character owner:
+                            <ul>
+                                <li>Log out and back into Alliance Auth</li>
+                                <li>Re-add their ESI token</li>
+                            </ul>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Log Entries -->
+    {% if log_entries %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><i class="fas fa-file-alt"></i> Recent Log Entries (Last 100 lines)</h3>
+                </div>
+                <div class="panel-body">
+                    <pre style="max-height: 400px; overflow-y: auto; background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 12px;">{% for entry in log_entries %}{{ entry }}{% endfor %}</pre>
+                    <p class="text-muted" style="margin-top: 10px;">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Note:</strong> This shows the most recent log entries. For complete logs, check your Django log files or container logs.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Manual Sync Instructions -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><i class="fas fa-terminal"></i> Manual Sync via Console</h3>
+                </div>
+                <div class="panel-body">
+                    <p>To manually trigger a sync from the command line:</p>
+                    <pre style="background: #2b2b2b; color: #f8f8f2; padding: 10px; border-radius: 4px;">python manage.py shell
+
+from corp_inventory.tasks import sync_all_corporations
+sync_all_corporations()</pre>
+                    <p style="margin-top: 10px;">Or view logs in real-time:</p>
+                    <pre style="background: #2b2b2b; color: #f8f8f2; padding: 10px; border-radius: 4px;"># If using Docker:
+docker logs -f allianceauth_beat
+
+# If using systemd:
+journalctl -u allianceauth-beat -f</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
