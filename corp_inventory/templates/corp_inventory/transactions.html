@@ -18,10 +18,10 @@
 </div>
     
 <!-- Filters -->
-<div class="well well-sm filter-bar">
-        <form method="get" class="form-inline">
+<div class="filter-bar">
+        <form method="get" class="d-flex flex-wrap align-items-end gap-2">
             {% if not corporation %}
-            <div class="form-group">
+            <div class="mb-2">
                 <label for="corporation">Corporation:</label>
                 <select name="corporation" id="corporation" class="form-control">
                     <option value="">All Corporations</option>
@@ -32,7 +32,7 @@
             </div>
             {% endif %}
             
-            <div class="form-group">
+            <div class="mb-2">
                 <label for="type">Type:</label>
                 <select name="type" id="type" class="form-control">
                     <option value="">All Types</option>
@@ -51,7 +51,7 @@
                 </select>
             </div>
             
-            <div class="form-group">
+            <div class="mb-2">
                 <label for="days">Time Period:</label>
                 <select name="days" id="days" class="form-control">
                     <option value="1" {% if days_back == "1" %}selected{% endif %}>Last 24 hours</option>
@@ -61,13 +61,13 @@
                 </select>
             </div>
             
-            <div class="form-group">
+            <div class="mb-2">
                 <label for="search">Item:</label>
                 <input type="text" name="search" id="search" class="form-control" 
                        value="{{ search_query }}" placeholder="Item name...">
             </div>
             
-            <div class="form-group">
+            <div class="mb-2">
                 <label for="character">Character:</label>
                 <input type="text" name="character" id="character" class="form-control" 
                        value="{{ character_search }}" placeholder="Character name...">
@@ -78,7 +78,7 @@
             </button>
             
             <a href="{% if corporation %}{% url 'corp_inventory:corporation_transactions' corporation.corporation_id %}{% else %}{% url 'corp_inventory:transactions' %}{% endif %}" 
-               class="btn btn-default">
+               class="btn btn-secondary">
                 <i class="fas fa-times"></i> Clear
             </a>
         </form>
@@ -87,7 +87,7 @@
 <!-- Transactions Table -->
 <div class="row">
     <div class="col-md-12">
-        <div class="panel panel-default stat-card">
+        <div class="card stat-card">
                 <h3><i class="fas fa-list"></i> Recent Transactions</h3>
                 
                 {% if transactions %}
@@ -101,7 +101,7 @@
                                 <th>Change</th>
                                 <th>Location</th>
                                 <th>Division</th>
-                                <th class="text-right">Value</th>
+                                <th class="text-end">Value</th>
                                 {% if not corporation %}
                                 <th>Corporation</th>
                                 {% endif %}
@@ -117,19 +117,19 @@
                                 </td>
                                 <td>
                                     {% if trans.transaction_type == "ADD" %}
-                                        <span class="label label-success transaction-add">
+                                        <span class="badge bg-success transaction-add">
                                             <i class="fas fa-plus"></i> Addition
                                         </span>
                                     {% elif trans.transaction_type == "REMOVE" %}
-                                        <span class="label label-danger transaction-remove">
+                                        <span class="badge bg-danger transaction-remove">
                                             <i class="fas fa-minus"></i> Removal
                                         </span>
                                     {% elif trans.transaction_type == "CHANGE" %}
-                                        <span class="label label-warning transaction-change">
+                                        <span class="badge bg-warning text-dark transaction-change">
                                             <i class="fas fa-exchange-alt"></i> Change
                                         </span>
                                     {% else %}
-                                        <span class="label label-info">
+                                        <span class="badge bg-info text-dark">
                                             <i class="fas fa-arrows-alt"></i> Movement
                                         </span>
                                     {% endif %}
@@ -162,7 +162,7 @@
                                         <em class="text-muted">N/A</em>
                                     {% endif %}
                                 </td>
-                                <td class="text-right">
+                                <td class="text-end">
                                     <span class="isk-value">{{ trans.estimated_value|floatformat:2 }}</span>
                                 </td>
                                 {% if not corporation %}

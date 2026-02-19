@@ -32,7 +32,7 @@
     <div class="row">
         {% for stat in corp_stats %}
         <div class="col-md-6 col-lg-4">
-            <div class="panel panel-default stat-card">
+            <div class="card stat-card">
 
                 <!-- Card header: corp logo + name -->
                 <div class="corp-card-header">
@@ -53,11 +53,11 @@
 
                 <!-- Stats row -->
                 <div class="row">
-                    <div class="col-xs-6">
+                    <div class="col-6">
                         <div class="stat-number">{{ stat.active_items|intcomma }}</div>
                         <div class="stat-label">Items</div>
                     </div>
-                    <div class="col-xs-6">
+                    <div class="col-6">
                         <div class="stat-number isk-value">{{ stat.total_value_display }} ISK</div>
                         <div class="stat-label">Total Value</div>
                     </div>
@@ -75,7 +75,7 @@
 
                 <!-- Sync + activity info -->
                 <div class="row">
-                    <div class="col-xs-6">
+                    <div class="col-6">
                         <small>
                             <i class="fas fa-sync-alt text-muted"></i>
                             <strong>{% trans "Last Sync" %}:</strong><br>
@@ -88,7 +88,7 @@
                             {% endif %}
                         </small>
                     </div>
-                    <div class="col-xs-6">
+                    <div class="col-6">
                         <small>
                             <i class="fas fa-exchange-alt text-muted"></i>
                             <strong>{% trans "7-day Txns" %}:</strong><br>
@@ -100,7 +100,7 @@
                 <hr style="margin:10px 0;">
 
                 <!-- Action buttons -->
-                <div class="btn-group btn-group-justified" style="margin-bottom:4px;">
+                <div class="btn-group d-flex gap-1" style="margin-bottom:4px;">
                     <a href="{% url 'corp_inventory:corporation_hangar' stat.corporation.corporation_id %}"
                        class="btn btn-primary btn-sm">
                         <i class="fas fa-boxes"></i> Hangar
@@ -110,11 +110,11 @@
                         <i class="fas fa-list"></i> Txns
                     </a>
                     <a href="{% url 'corp_inventory:statistics' stat.corporation.corporation_id %}"
-                       class="btn btn-default btn-sm">
+                       class="btn btn-secondary btn-sm flex-fill">
                         <i class="fas fa-chart-bar"></i> Stats
                     </a>
                     <a href="{% url 'corp_inventory:container_logs' stat.corporation.corporation_id %}"
-                       class="btn btn-default btn-sm"
+                       class="btn btn-secondary btn-sm flex-fill"
                        title="Container access logs">
                         <i class="fas fa-lock"></i> Logs
                     </a>
@@ -122,7 +122,7 @@
 
                 {% if perms.corp_inventory.manage_tracking %}
                 <a href="{% url 'corp_inventory:sync_corporation' stat.corporation.corporation_id %}"
-                   class="btn btn-warning btn-sm btn-block" style="margin-top:4px;">
+                   class="btn btn-warning btn-sm d-block w-100" style="margin-top:4px;">
                     <i class="fas fa-sync"></i> Sync Now
                 </a>
                 {% endif %}

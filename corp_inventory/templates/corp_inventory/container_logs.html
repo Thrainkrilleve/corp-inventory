@@ -10,24 +10,24 @@
     <!-- Page header -->
     <div class="page-header d-flex align-items-center" style="gap:12px;">
       <img src="https://images.evetech.net/corporations/{{ corporation.corporation_id }}/logo?size=64"
-           alt="{{ corporation.corporation_name }}" class="img-circle" style="width:48px;height:48px;">
+           alt="{{ corporation.corporation_name }}" class="rounded-circle" style="width:48px;height:48px;">
       <div>
         <h2 style="margin:0;">Container Logs</h2>
         <small class="text-muted">{{ corporation.corporation_name }}</small>
       </div>
       <a href="{% url 'corp_inventory:corporation_hangar' corporation.corporation_id %}"
-         class="btn btn-default btn-sm ms-auto" style="margin-left:auto;">
+         class="btn btn-secondary btn-sm ms-auto" style="margin-left:auto;">
         <i class="fas fa-arrow-left"></i> Back to Hangar
       </a>
     </div>
 
     <!-- Filter bar -->
-    <form method="get" class="filter-bar well well-sm">
+    <form method="get" class="filter-bar">
       <div class="row">
 
         <div class="col-sm-3">
           <label class="filter-label">Action</label>
-          <select name="action" class="form-control input-sm">
+          <select name="action" class="form-select form-select-sm">
             <option value="">All actions</option>
             {% for value, label in action_choices %}
             <option value="{{ value }}" {% if value == selected_action %}selected{% endif %}>{{ label }}</option>
@@ -37,13 +37,13 @@
 
         <div class="col-sm-3">
           <label class="filter-label">Character</label>
-          <input type="text" name="character" class="form-control input-sm"
+          <input type="text" name="character" class="form-control form-control-sm"
                  placeholder="Character name…" value="{{ character_filter }}">
         </div>
 
         <div class="col-sm-3">
           <label class="filter-label">Item type</label>
-          <input type="text" name="item" class="form-control input-sm"
+          <input type="text" name="item" class="form-control form-control-sm"
                  placeholder="Item name…" value="{{ type_filter }}">
         </div>
 
@@ -52,7 +52,7 @@
             <i class="fas fa-filter"></i> Filter
           </button>
           <a href="{% url 'corp_inventory:container_logs' corporation.corporation_id %}"
-             class="btn btn-default btn-sm" style="margin-top:19px;margin-left:6px;">
+             class="btn btn-secondary btn-sm" style="margin-top:19px;margin-left:6px;">
             <i class="fas fa-times"></i> Clear
           </a>
         </div>
@@ -63,14 +63,14 @@
     <!-- Log table -->
     <div class="corp-inv-table-wrapper">
       {% if logs %}
-      <table class="table table-hover table-condensed" id="container-log-table">
+      <table class="table table-hover table-sm" id="container-log-table">
         <thead>
           <tr>
             <th><i class="fas fa-clock text-muted"></i> Time</th>
             <th><i class="fas fa-user text-muted"></i> Character</th>
             <th><i class="fas fa-exchange-alt text-muted"></i> Action</th>
             <th><i class="fas fa-cube text-muted"></i> Item</th>
-            <th class="text-right">Qty</th>
+            <th class="text-end">Qty</th>
             <th><i class="fas fa-box text-muted"></i> Container</th>
             <th><i class="fas fa-map-marker-alt text-muted"></i> Location Flag</th>
           </tr>
@@ -91,15 +91,15 @@
             </td>
             <td>
               {% if log.action == "take" %}
-              <span class="label label-danger">{{ log.get_action_display }}</span>
+              <span class="badge bg-danger">{{ log.get_action_display }}</span>
               {% elif log.action == "add" %}
-              <span class="label label-success">{{ log.get_action_display }}</span>
+              <span class="badge bg-success">{{ log.get_action_display }}</span>
               {% elif log.action == "move" %}
-              <span class="label label-info">{{ log.get_action_display }}</span>
+              <span class="badge bg-info text-dark">{{ log.get_action_display }}</span>
               {% elif log.action == "configure" or log.action == "set_password" or log.action == "lock" or log.action == "unlock" %}
-              <span class="label label-warning">{{ log.get_action_display }}</span>
+              <span class="badge bg-warning text-dark">{{ log.get_action_display }}</span>
               {% else %}
-              <span class="label label-default">{{ log.get_action_display }}</span>
+              <span class="badge bg-secondary">{{ log.get_action_display }}</span>
               {% endif %}
             </td>
             <td>
@@ -111,7 +111,7 @@
               <span class="text-muted">—</span>
               {% endif %}
             </td>
-            <td class="text-right">
+            <td class="text-end">
               {% if log.quantity is not None %}
               {{ log.quantity|intcomma }}
               {% else %}—{% endif %}

@@ -192,8 +192,8 @@
         showMessage: function(message, type) {
             type = type || 'info';
             var alertClass = 'alert-' + type;
-            var html = '<div class="alert ' + alertClass + ' alert-dismissible fade in">' +
-                      '<button type="button" class="close" data-dismiss="alert">&times;</button>' +
+            var html = '<div class="alert ' + alertClass + ' alert-dismissible fade show">' +
+                      '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
                       message + '</div>';
             
             $('.corp-inventory-wrapper').prepend(html);

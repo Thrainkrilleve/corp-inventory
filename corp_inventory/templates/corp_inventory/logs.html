@@ -12,11 +12,11 @@
     <!-- Required Scopes -->
     <div class="row">
         <div class="col-md-12">
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h3 class="panel-title"><i class="fas fa-key"></i> Required ESI Scopes</h3>
+            <div class="card border-info">
+                <div class="card-header">
+                    <h3><i class="fas fa-key"></i> Required ESI Scopes</h3>
                 </div>
-                <div class="panel-body">
+                <div class="card-body">
                     <p>Characters need tokens with the following scopes:</p>
                     <ul>
                         {% for scope in required_scopes %}
@@ -43,24 +43,24 @@
             </div>
             {% else %}
             {% for diag in diagnostics %}
-            <div class="panel {% if diag.has_valid_token and diag.tracking_enabled %}panel-success{% elif diag.tracking_enabled %}panel-warning{% else %}panel-default{% endif %}">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
+            <div class="card {% if diag.has_valid_token and diag.tracking_enabled %}border-success{% elif diag.tracking_enabled %}border-warning{% endif %} mb-3">
+                <div class="card-header">
+                    <h4>
                         <i class="fas fa-building"></i> {{ diag.corporation.corporation_name }}
                         {% if not diag.tracking_enabled %}
-                        <span class="label label-default pull-right">Tracking Disabled</span>
+                        <span class="badge bg-secondary float-end">Tracking Disabled</span>
                         {% elif diag.has_valid_token %}
-                        <span class="label label-success pull-right">OK</span>
+                        <span class="badge bg-success float-end">OK</span>
                         {% else %}
-                        <span class="label label-danger pull-right">Configuration Error</span>
+                        <span class="badge bg-danger float-end">Configuration Error</span>
                         {% endif %}
                     </h4>
                 </div>
-                <div class="panel-body">
+                <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
                             <h5>Configuration</h5>
-                            <table class="table table-condensed">
+                            <table class="table table-sm">
                                 <tr>
                                     <th>Corporation ID:</th>
                                     <td>{{ diag.corporation.corporation_id }}</td>
@@ -69,9 +69,9 @@
                                     <th>Tracking Enabled:</th>
                                     <td>
                                         {% if diag.tracking_enabled %}
-                                        <span class="label label-success">Yes</span>
+                                        <span class="badge bg-success">Yes</span>
                                         {% else %}
-                                        <span class="label label-default">No</span>
+                                        <span class="badge bg-secondary">No</span>
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -90,14 +90,14 @@
                         </div>
                         <div class="col-md-6">
                             <h5>Token Status</h5>
-                            <table class="table table-condensed">
+                            <table class="table table-sm">
                                 <tr>
                                     <th>Characters Found:</th>
                                     <td>
                                         {% if diag.character_count > 0 %}
-                                        <span class="label label-success">{{ diag.character_count }}</span>
+                                        <span class="badge bg-success">{{ diag.character_count }}</span>
                                         {% else %}
-                                        <span class="label label-danger">0</span>
+                                        <span class="badge bg-danger">0</span>
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -105,9 +105,9 @@
                                     <th>Valid Tokens:</th>
                                     <td>
                                         {% if diag.token_count > 0 %}
-                                        <span class="label label-success">{{ diag.token_count }}</span>
+                                        <span class="badge bg-success">{{ diag.token_count }}</span>
                                         {% else %}
-                                        <span class="label label-danger">0</span>
+                                        <span class="badge bg-danger">0</span>
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -115,9 +115,9 @@
                                     <th>Can Sync:</th>
                                     <td>
                                         {% if diag.has_valid_token %}
-                                        <span class="label label-success">Yes</span>
+                                        <span class="badge bg-success">Yes</span>
                                         {% else %}
-                                        <span class="label label-danger">No - Add Token</span>
+                                        <span class="badge bg-danger">No - Add Token</span>
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -171,11 +171,11 @@
     <!-- Help Section -->
     <div class="row">
         <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title"><i class="fas fa-question-circle"></i> Troubleshooting Guide</h3>
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h3><i class="fas fa-question-circle"></i> Troubleshooting Guide</h3>
                 </div>
-                <div class="panel-body">
+                <div class="card-body">
                     <h5>Common Issues:</h5>
                     <dl>
                         <dt>No valid tokens found</dt>
@@ -217,11 +217,11 @@
     {% if log_entries %}
     <div class="row">
         <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title"><i class="fas fa-file-alt"></i> Recent Log Entries (Last 100 lines)</h3>
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h3><i class="fas fa-file-alt"></i> Recent Log Entries (Last 100 lines)</h3>
                 </div>
-                <div class="panel-body">
+                <div class="card-body">
                     <pre class="corp-inv-log">{% for entry in log_entries %}{{ entry }}{% endfor %}</pre>
                     <p class="text-muted log-note">
                         <i class="fas fa-info-circle"></i>
@@ -236,11 +236,11 @@
     <!-- Manual Sync Instructions -->
     <div class="row">
         <div class="col-md-12">
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h3 class="panel-title"><i class="fas fa-terminal"></i> Manual Sync via Console</h3>
+            <div class="card border-info mb-3">
+                <div class="card-header">
+                    <h3><i class="fas fa-terminal"></i> Manual Sync via Console</h3>
                 </div>
-                <div class="panel-body">
+                <div class="card-body">
                     <p>To manually trigger a sync from the command line:</p>
                     <pre class="corp-inv-code">python manage.py shell
 

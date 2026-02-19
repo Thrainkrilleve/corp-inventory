@@ -12,11 +12,11 @@
         <p class="lead">View all items in corporation hangars</p>
         <div style="margin-bottom:8px;">
             <a href="{% url 'corp_inventory:container_logs' corporation.corporation_id %}"
-               class="btn btn-default btn-sm">
+               class="btn btn-secondary btn-sm">
                 <i class="fas fa-lock"></i> Container Logs
             </a>
             <a href="{% url 'corp_inventory:statistics' corporation.corporation_id %}"
-               class="btn btn-default btn-sm" style="margin-left:6px;">
+               class="btn btn-secondary btn-sm" style="margin-left:6px;">
                 <i class="fas fa-chart-bar"></i> Statistics
             </a>
         </div>
@@ -26,19 +26,19 @@
 <!-- Summary Stats -->
 <div class="row">
         <div class="col-sm-4">
-            <div class="panel panel-default stat-card">
+            <div class="card stat-card">
                 <div class="stat-number">{{ total_items|intcomma }}</div>
                 <div class="stat-label">Total Items</div>
             </div>
         </div>
         <div class="col-sm-4">
-            <div class="panel panel-default stat-card">
+            <div class="card stat-card">
                 <div class="stat-number isk-value">{{ total_value|floatformat:2 }}</div>
                 <div class="stat-label">Total Value (ISK)</div>
             </div>
         </div>
         <div class="col-sm-4">
-            <div class="panel panel-default stat-card">
+            <div class="card stat-card">
                 <div class="stat-label">Last Sync</div>
                 <div>
                     {% if corporation.last_sync %}
@@ -58,9 +58,9 @@
     </div>
     
 <!-- Filters -->
-<div class="well well-sm filter-bar">
-        <form method="get" id="hangar-filter-form" class="form-inline">
-            <div class="form-group">
+<div class="filter-bar">
+        <form method="get" id="hangar-filter-form" class="d-flex flex-wrap align-items-end gap-2">
+            <div class="me-2">
                 <label for="search">Search:</label>
                 <input type="text" name="search" id="hangar-search" class="form-control" 
                        value="{{ search_query }}" placeholder="Item name..." autocomplete="off">
@@ -69,7 +69,7 @@
                 </span>
             </div>
             
-            <div class="form-group">
+            <div class="me-2">
                 <label for="division">Division:</label>
                 <select name="division" id="division" class="form-control">
                     <option value="">All Divisions</option>
@@ -82,7 +82,7 @@
                 </select>
             </div>
             
-            <div class="form-group">
+            <div class="me-2">
                 <label for="location">Location:</label>
                 <select name="location" id="location" class="form-control">
                     <option value="">All Locations</option>
@@ -96,7 +96,7 @@
             </div>
             
             <a href="{% url 'corp_inventory:corporation_hangar' corporation.corporation_id %}" 
-               class="btn btn-default">
+               class="btn btn-secondary">
                 <i class="fas fa-times"></i> Clear
             </a>
         </form>
@@ -105,7 +105,7 @@
 <!-- Items Table -->
 <div class="row">
     <div class="col-md-12">
-        <div class="panel panel-default stat-card">
+        <div class="card stat-card">
                 <h3><i class="fas fa-list"></i> Hangar Items</h3>
                 
                 {% if items %}
@@ -117,7 +117,7 @@
                                 <th>Quantity</th>
                                 <th>Location</th>
                                 <th>Division</th>
-                                <th class="text-right">Estimated Value</th>
+                                <th class="text-end">Estimated Value</th>
                                 <th>Last Seen</th>
                                 <th>Actions</th>
                             </tr>
@@ -132,7 +132,7 @@
                                          onerror="this.style.display='none'">
                                     <strong>{{ item.type_name }}</strong>
                                     {% if item.is_blueprint_copy %}
-                                        <span class="label label-info">BPC</span>
+                                    <span class="badge bg-info text-dark">BPC</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ item.quantity|intcomma }}</td>
@@ -152,7 +152,7 @@
                                         <em class="text-muted">N/A</em>
                                     {% endif %}
                                 </td>
-                                <td class="text-right">
+                                <td class="text-end">
                                     <span class="isk-value">{{ item.estimated_value|floatformat:2 }}</span>
                                 </td>
                                 <td>
@@ -160,7 +160,7 @@
                                 </td>
                                 <td>
                                     <a href="{% url 'corp_inventory:item_details' item.item_id %}" 
-                                       class="btn btn-xs btn-default">
+                                       class="btn btn-sm btn-secondary">
                                         <i class="fas fa-info-circle"></i> Details
                                     </a>
                                 </td>
