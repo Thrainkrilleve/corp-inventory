@@ -258,7 +258,7 @@ def sync_container_logs(corporation: Corporation, token: Token):
 
         created_count = 0
         for entry in log_entries:
-            character_id = entry.get("logged_by")  # ESI field name
+            character_id = entry.get("character_id")  # ESI field name
             if not character_id:
                 continue
 
