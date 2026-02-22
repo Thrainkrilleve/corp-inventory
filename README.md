@@ -58,7 +58,7 @@ INSTALLED_APPS = [
 ]
 ```
 ```
-Add git+https://github.com/Thrainkrilleve/corp-inventory.git to requirements.txt
+Add allianceauth-corp-inventory @ git+https://github.com/Thrainkrilleve/corp-inventory.git@v0.1.27
 
 ```
 ### Step 3: Configure ESI Scopes
@@ -134,7 +134,7 @@ If you prefer to manually add corporations or need to add a corporation whose Di
 ### Standard Update (Systemd / bare metal)
 
 ```bash
-pip install --force-reinstall --no-deps git+https://github.com/Thrainkrilleve/corp-inventory.git
+pip install --upgrade git+https://github.com/Thrainkrilleve/corp-inventory.git
 python manage.py migrate
 python manage.py collectstatic --noinput
 supervisorctl restart myauth:
@@ -147,7 +147,11 @@ supervisorctl restart myauth:
 docker compose exec allianceauth_gunicorn bash
 
 # Reinstall the package
-pip install --force-reinstall --no-deps git+https://github.com/Thrainkrilleve/corp-inventory.git
+pip install --upgrade git+https://github.com/Thrainkrilleve/corp-inventory.git
+
+# Update requirements.txt with new version
+
+allianceauth-corp-inventory @ git+https://github.com/Thrainkrilleve/corp-inventory.git@v0.1.27
 
 # Apply migrations and collect static files
 auth migrate
@@ -155,10 +159,11 @@ auth collectstatic --noinput
 
 # Exit and restart
 exit
+
+docker compose build
+
 docker compose restart
 ```
-
-> **Tip:** Always use `--force-reinstall --no-deps` so pip replaces the cached wheel with the latest version.
 
 ### After Updating
 
@@ -180,7 +185,7 @@ print(corp_inventory.__version__)
 
 ## Configuration
 
-Optional settings in your `local.py`:
+Put these settings in your `local.py`:
 
 ```python
 # How often to sync hangar data (in minutes)
@@ -194,6 +199,18 @@ CORPINVENTORY_ENABLE_NOTIFICATIONS = True
 
 # Minimum value (ISK) for transaction alerts
 CORPINVENTORY_ALERT_THRESHOLD = 100000000  # 100M ISK
+```
+## Periodic Tasks
+
+The app uses Celery to run periodic sync tasks. Make sure your Alliance Auth Celery beat scheduler is running.
+
+Add to your `local.py` settings:
+
+```python
+CELERYBEAT_SCHEDULE['corp_inventory_sync'] = {
+    'task': 'corp_inventory.tasks.sync_all_corporations',
+    'schedule': crontab(minute='*/30'),  # Run every 30 minutes
+}
 ```
 
 ### Theme Support
@@ -237,19 +254,6 @@ Transaction logs automatically capture every change detected between syncs:
 - **MOVE** -- items that have moved to a different location or structure
 
 The Statistics page shows a 30-day summary broken down by transaction type.
-
-## Periodic Tasks
-
-The app uses Celery to run periodic sync tasks. Make sure your Alliance Auth Celery beat scheduler is running.
-
-Add to your `local.py` settings:
-
-```python
-CELERYBEAT_SCHEDULE['corp_inventory_sync'] = {
-    'task': 'corp_inventory.tasks.sync_all_corporations',
-    'schedule': crontab(minute='*/30'),  # Run every 30 minutes
-}
-```
 
 ## Troubleshooting
 
@@ -300,20 +304,7 @@ sync_all_corporations()
 
 ### Common Issues
 
-1. **Migration error: "Key 'corp_inv_corp_active_idx' doesn't exist"**
-   - This occurs when upgrading from v0.1.0 to v0.1.1 or later
-   - **Fix:** Run the migration fix command:
-     ```bash
-     # Docker
-     docker compose exec allianceauth_gunicorn bash
-     auth fix_corp_inventory_migration
-     
-     # Systemd
-     python manage.py fix_corp_inventory_migration
-     ```
-   - This automatically handles the migration history conflict
-
-2. **No valid token found**
+1. **No valid token found**
    - A Corporation Director or CEO must authenticate with Alliance Auth
    - They must add an ESI token with all required scopes:
      - `esi-assets.read_corporation_assets.v1`
