@@ -489,6 +489,23 @@ def process_assets(
         existing = existing_items.get(item_id)
         if existing:
             old_quantity = existing.quantity
+
+            # Detect location change → MOVE transaction
+            if existing.location_id != location.pk:
+                transactions_to_create.append(HangarTransaction(
+                    corporation=corporation,
+                    transaction_type="MOVE",
+                    type_id=type_id,
+                    type_name=type_name,
+                    old_quantity=old_quantity,
+                    new_quantity=quantity,
+                    quantity_change=0,
+                    location=location,
+                    division=division,
+                    estimated_value=estimated_value,
+                ))
+
+            # Detect quantity change → CHANGE transaction
             if old_quantity != quantity:
                 transactions_to_create.append(HangarTransaction(
                     corporation=corporation,
@@ -601,53 +618,68 @@ def process_assets(
 
 def get_or_create_location(location_id: int, token: Token) -> Location:
     """
-    Get or create a Location object
-    
+    Get or create a Location object.
+
+    Placeholder "Unknown Location" entries are re-tried on every sync so that
+    a structure that was temporarily inaccessible (e.g. reinforced, destroyed
+    then asset-safetied, or 403 at first fetch) will be resolved as soon as
+    the ESI query starts succeeding again.
+
     Args:
-        location_id: Location ID
-        token: ESI token
-        
+        location_id: EVE location ID (station <1T, structure ≥1T).
+        token: ESI token used for private-structure lookups.
+
     Returns:
-        Location object or None
+        Location object (may still be a placeholder if ESI is unavailable).
     """
+    # ── DB cache hit ──────────────────────────────────────────────────────
     try:
-        return Location.objects.get(location_id=location_id)
+        existing = Location.objects.get(location_id=location_id)
+        # Only return the cached entry if it was successfully resolved before.
+        # Placeholders ("Unknown Location …") are retried every sync so that
+        # a previously-inaccessible structure gets resolved as soon as ESI
+        # starts returning data for it.
+        if not existing.location_name.startswith("Unknown Location "):
+            return existing
+        # Fall through to retry the ESI lookup below.
     except Location.DoesNotExist:
-        pass
-    
-    # Try to fetch location data
+        existing = None
+
+    # ── ESI lookup ────────────────────────────────────────────────────────
     location_data = None
     location_type = "unknown"
-    
-    # Check if it's a structure (> 1000000000000)
-    if location_id >= 1000000000000:
+
+    if location_id >= 1_000_000_000_000:
         location_data = CorpInventoryManager.get_structure_info(token, location_id)
         location_type = "structure"
     else:
         location_data = CorpInventoryManager.get_station_info(location_id)
         location_type = "station"
-    
+
     if not location_data:
-        # Create placeholder
+        if existing:
+            # Return the existing placeholder without touching it.
+            return existing
+        logger.warning(
+            f"Could not resolve location {location_id} — creating placeholder."
+        )
         return Location.objects.create(
             location_id=location_id,
             location_name=f"Unknown Location {location_id}",
             location_type=location_type,
         )
-    
-    # Get system info if available
+
+    # ── Resolve system / region chain ─────────────────────────────────────
     system_id = location_data.get("solar_system_id")
     system_name = ""
     region_id = None
     region_name = ""
-    
+
     if system_id:
         system_info = CorpInventoryManager.get_solar_system_info(system_id)
         if system_info:
             system_name = system_info.get("name", "")
             constellation_id = system_info.get("constellation_id")
-            
-            # Get region from constellation
             if constellation_id:
                 constellation_info = CorpInventoryManager.get_constellation_info(constellation_id)
                 if constellation_info:
@@ -656,10 +688,26 @@ def get_or_create_location(location_id: int, token: Token) -> Location:
                         region_info = CorpInventoryManager.get_region_info(region_id)
                         if region_info:
                             region_name = region_info.get("name", "")
-    
+
+    resolved_name = location_data.get("name", f"Location {location_id}")
+
+    if existing:
+        # Update the placeholder in-place so FKs from HangarItem etc. remain valid.
+        existing.location_name = resolved_name
+        existing.location_type = location_type
+        existing.solar_system_id = system_id
+        existing.solar_system_name = system_name
+        existing.region_id = region_id
+        existing.region_name = region_name
+        existing.save()
+        logger.info(
+            f"Resolved previously-unknown location {location_id} → '{resolved_name}'"
+        )
+        return existing
+
     return Location.objects.create(
         location_id=location_id,
-        location_name=location_data.get("name", f"Location {location_id}"),
+        location_name=resolved_name,
         location_type=location_type,
         solar_system_id=system_id,
         solar_system_name=system_name,

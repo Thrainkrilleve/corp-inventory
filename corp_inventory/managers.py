@@ -102,9 +102,22 @@ class CorpInventoryManager:
             return structure
             
         except Exception as e:
-            logger.warning(
-                f"Error fetching structure {structure_id}: {e}"
+            # Extract HTTP status code from bravado / requests exceptions if present.
+            status_code = (
+                getattr(e, "status_code", None)
+                or getattr(getattr(e, "response", None), "status_code", None)
             )
+            if status_code == 403:
+                logger.warning(
+                    f"Structure {structure_id} is inaccessible (403 Forbidden). "
+                    f"The token character may lack docking rights, or the structure "
+                    f"has been destroyed and assets are in asset safety."
+                )
+            else:
+                logger.warning(
+                    f"Error fetching structure {structure_id}"
+                    f"{f' (HTTP {status_code})' if status_code else ''}: {e}"
+                )
             return None
     
     @staticmethod
