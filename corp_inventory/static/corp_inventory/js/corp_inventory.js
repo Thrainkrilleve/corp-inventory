@@ -114,8 +114,12 @@
                     order: [[0, 'asc']],
                     pageLength: 50,
                     lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "All"]],
-                    responsive: true,
-                    dom: '<"row"<"col-sm-6"l><"col-sm-6"f>>rtip'
+                    layout: {
+                        topStart: 'pageLength',
+                        topEnd: 'search',
+                        bottomStart: 'info',
+                        bottomEnd: 'paging'
+                    }
                 });
             }
 
@@ -124,7 +128,12 @@
                     order: [[0, 'desc']],
                     pageLength: 50,
                     lengthMenu: [[25, 50, 100, -1], [25, 50, 100, "All"]],
-                    responsive: true
+                    layout: {
+                        topStart: 'pageLength',
+                        topEnd: 'search',
+                        bottomStart: 'info',
+                        bottomEnd: 'paging'
+                    }
                 });
             }
         },

@@ -1,4 +1,4 @@
-{% extends "allianceauth/base.html" %}
+{% extends "allianceauth/base-bs5.html" %}
 {% load static %}
 {% load i18n %}
 
@@ -33,10 +33,12 @@
 {% endblock %}
 
 {% block extra_css %}{{ block.super }}
+{% include 'bundles/datatables-2-css-bs5.html' %}
 <link rel="stylesheet" href="{% static 'corp_inventory/css/corp_inventory.css' %}">
 {% endblock %}
 
 {% block extra_javascript %}{{ block.super }}
+{% include 'bundles/datatables-2-js-bs5.html' %}
 <script src="{% static 'corp_inventory/js/corp_inventory.js' %}"></script>
 <script>
     // Format ISK values
