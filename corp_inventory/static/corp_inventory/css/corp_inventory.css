@@ -24,6 +24,16 @@
 
 /* ---- Stat Cards ---- */
 
+/* Force all cards inside corp-inventory to follow the active theme's
+   body bg/color. aa-gdpr dark sets --bs-body-bg but does NOT set
+   Bootstrap's --bs-card-bg or --bs-tertiary-bg via data-bs-theme,
+   so we pin all our cards to the body variables instead. */
+.corp-inventory-wrapper .card {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border-color: var(--bs-border-color);
+}
+
 .stat-card {
     border-radius: 4px;
     padding: 20px;
@@ -210,8 +220,9 @@
     max-height: 400px;
     overflow-y: auto;
     font-size: 12px;
-    background-color: var(--bs-tertiary-bg, #f8f9fa);
-    border: 1px solid var(--bs-border-color, #dee2e6);
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border: 1px solid var(--bs-border-color);
     border-radius: 4px;
     padding: 10px;
     white-space: pre-wrap;
@@ -219,8 +230,9 @@
 }
 
 .corp-inv-code {
-    background-color: var(--bs-tertiary-bg, #f8f9fa);
-    border: 1px solid var(--bs-border-color, #dee2e6);
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border: 1px solid var(--bs-border-color);
     border-radius: 4px;
     padding: 10px;
     font-family: 'Courier New', monospace;
