@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.30] - 2026-03-02
+
+### Fixed
+- **Signal attribute error on character save** corrected `character_corporation_id` to `corporation_id` in the `auto_add_corporation` signal handler, which caused an `AttributeError` when a new `EveCharacter` was saved.
+
+---
+
 ## [0.1.29] - 2026-02-21
 
 ### Added

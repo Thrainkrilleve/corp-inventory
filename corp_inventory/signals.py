@@ -29,14 +29,14 @@ def auto_add_corporation(sender, instance, created, **kwargs):
     if not created:
         return  # Only process new character additions
     
-    if not instance.character_corporation_id:
+    if not instance.corporation_id:
         logger.debug(f"Character {instance.character_name} has no corporation ID")
         return
     
     try:
         # Check if corporation is already being tracked
         corporation, created = Corporation.objects.get_or_create(
-            corporation_id=instance.character_corporation_id,
+            corporation_id=instance.corporation_id,
             defaults={
                 'corporation_name': instance.corporation_name,
                 'tracking_enabled': True,
@@ -46,7 +46,7 @@ def auto_add_corporation(sender, instance, created, **kwargs):
         if created:
             logger.info(
                 f"Auto-added corporation {instance.corporation_name} "
-                f"(ID: {instance.character_corporation_id}) "
+                f"(ID: {instance.corporation_id}) "
                 f"when {instance.character_name} authenticated"
             )
         else:
