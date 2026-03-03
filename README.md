@@ -3,28 +3,24 @@
 Track and monitor corporation hangar assets in EVE Online through Alliance Auth.
 
 ![License](https://img.shields.io/badge/license-MIT-green)
+![Version](https://img.shields.io/badge/version-0.1.31-blue)
 ![Python](https://img.shields.io/badge/python-3.10+-blue)
 ![Django](https://img.shields.io/badge/django-4.2+-blue)
 ![Alliance Auth](https://img.shields.io/badge/allianceauth-4.0+-blue)
 
 ## Features
 
-- **Hangar Inventory Tracking**: View all items across corporation hangars at any station or structure
-- **Transaction Logging**: Automatically records additions, removals, quantity changes, and item movements between locations
-- **Container Access Logs**: View ESI container access logs showing who interacted with secured containers
-- **Multi-Location Support**: Monitor assets across multiple stations and player-owned structures
-- **Division Filtering**: Filter items by hangar division (SAG 1â€“7)
-- **Value Estimation**: Automatic ISK valuation pulled from ESI market prices
-- **Search & Filter**: Powerful search and filter capabilities across all views
-- **Alert Rules**: Configure custom alerts for specific items or value thresholds
-- **Statistics Dashboard**: Analytics and insights on hangar activity over time
-- **ESI Integration**: Uses EVE Online's ESI API with Celery for automated background syncing
-
-## Screenshots
-
-![Dashboard](docs/screenshots/dashboard.png)
-![Hangar View](docs/screenshots/hangar.png)
-![Transactions](docs/screenshots/transactions.png)
+- **Hangar Inventory Tracking**  View all items across corporation hangars at any station or structure
+- **Transaction Logging**  Automatically records additions, removals, quantity changes, and item movements between locations
+- **Container Access Logs**  View ESI container access logs showing who interacted with secured containers
+- **Multi-Location Support**  Monitor assets across multiple stations and player-owned structures
+- **Division Filtering**  Filter items by hangar division (SAG 17)
+- **Value Estimation**  Automatic ISK valuation pulled from ESI market prices
+- **Search & Filter**  Powerful search and filter capabilities across all views
+- **Alert Rules**  Configure custom alerts for specific items or value thresholds
+- **Statistics Dashboard**  Analytics and insights on hangar activity over time
+- **ESI Integration**  Uses EVE Online's ESI API with Celery for automated background syncing
+- **Optional SDE Integration**  Use [django-eveonline-sde](https://pypi.org/project/django-eveonline-sde/) for faster, ESI-free type name and location lookups
 
 ## Installation
 
@@ -39,17 +35,22 @@ Track and monitor corporation hangar assets in EVE Online through Alliance Auth.
 **Docker:**
 ```bash
 docker compose exec allianceauth_gunicorn bash
-pip install git+https://github.com/Thrainkrilleve/corp-inventory.git
+pip install git+https://github.com/Thrainkrilleve/corp-inventory.git@v0.1.31
 ```
 
 **Systemd / bare metal:**
 ```bash
-pip install git+https://github.com/Thrainkrilleve/corp-inventory.git
+pip install git+https://github.com/Thrainkrilleve/corp-inventory.git@v0.1.31
+```
+
+To pin this in a `requirements.txt`:
+```
+allianceauth-corp-inventory @ git+https://github.com/Thrainkrilleve/corp-inventory.git@v0.1.31
 ```
 
 ### Step 2: Configure Alliance Auth
 
-Add `corp_inventory` to your `INSTALLED_APPS` in your Alliance Auth `local.py` settings file:
+Add `corp_inventory` to your `INSTALLED_APPS` in `myauth/settings/local.py`:
 
 ```python
 INSTALLED_APPS = [
@@ -57,13 +58,11 @@ INSTALLED_APPS = [
     'corp_inventory',
 ]
 ```
-```
-Add allianceauth-corp-inventory @ git+https://github.com/Thrainkrilleve/corp-inventory.git@v0.1.27
 
-```
 ### Step 3: Configure ESI Scopes
 
 The app requires the following ESI scopes on the Director/CEO token:
+
 - `esi-assets.read_corporation_assets.v1`
 - `esi-corporations.read_divisions.v1`
 - `esi-universe.read_structures.v1`
@@ -84,200 +83,202 @@ python manage.py collectstatic
 
 ### Step 6: Restart Services
 
-Restart your Alliance Auth services
+```bash
+# Systemd
+supervisorctl restart myauth:
+
+# Docker
+docker compose restart
+```
 
 ### Step 7: Configure Permissions
 
 Grant permissions to users/groups in Alliance Auth admin:
 
-- `corp_inventory.basic_access` - Basic access to the app
-- `corp_inventory.view_hangar` - View corporation hangars
-- `corp_inventory.view_transactions` - View transaction logs
-- `corp_inventory.manage_tracking` - Manage hangar tracking settings
-- `corp_inventory.manage_corporations` - Add/remove tracked corporations
+| Permission | Description |
+|---|---|
+| `corp_inventory.basic_access` | Basic access to the app |
+| `corp_inventory.view_hangar` | View corporation hangars |
+| `corp_inventory.view_transactions` | View transaction logs |
+| `corp_inventory.manage_tracking` | Manage hangar tracking settings |
+| `corp_inventory.manage_corporations` | Add/remove tracked corporations |
 
 ### Step 8: Set Up Corporations
 
 **Automatic Detection (Recommended)**
 
-When a Director or CEO from your corporation authenticates with Alliance Auth and adds their ESI token with the required scopes, their corporation is **automatically detected and added** to the tracking list with tracking enabled.
+When a Director or CEO authenticates with Alliance Auth and adds their ESI token with the required scopes, their corporation is **automatically detected and added** to the tracking list.
 
 **Manual Addition (Alternative)**
 
-If you prefer to manually add corporations or need to add a corporation whose Director/CEO hasn't authenticated yet:
+1. Navigate to Corp Inventory  Manage Corporations
+2. Enter the corporation ID and name
+3. Click Add
 
-**Option A: Through the App**
-1. Navigate to Corp Inventory in Alliance Auth
-2. Click "Manage Corporations"
-3. Enter your corporation ID, name, and ticker
-4. Add an ESI token from a corporation Director/CEO character
-5. Click "Sync Now"
+Or via Django admin: **Corp Inventory  Corporations  Add**.
 
-**Option B: Through Django Admin**
-1. Log in to Django admin
-2. Navigate to Corp Inventory â†’ Corporations
-3. Add your corporation(s) to track
-4. Ensure a Director/CEO character has added an ESI token
-5. Enable tracking for each corporation
+### Step 9: Add an ESI Token
 
-### Step 9: Add ESI Token
+A corporation Director or CEO must authenticate with Alliance Auth and add a token with all required scopes (listed in Step 3). The app automatically finds and uses this token for syncing.
 
-**Critical:** You must add an ESI token from a corporation Director or CEO:
+---
 
-1. Have a Director/CEO character authenticate with Alliance Auth
-2. Go to Alliance Auth ESI Tokens page
-3. Add a token with required scopes
-4. The app will automatically find and use this token
+## Optional: EVE SDE Integration
+
+[django-eveonline-sde](https://pypi.org/project/django-eveonline-sde/) provides a local database copy of the EVE Static Data Export. When installed, corp-inventory uses it for:
+
+- **Type name lookups**  one bulk DB query per sync instead of one ESI call per unknown type
+- **Location hierarchy** (system  constellation  region)  a single `SELECT` join instead of three serial ESI calls
+
+Both operations fall back to ESI automatically if the SDE is not installed.
+
+### Install
+
+```bash
+pip install "git+https://github.com/Thrainkrilleve/corp-inventory.git@v0.1.31#egg=allianceauth-corp-inventory[sde]"
+```
+
+### Configure `local.py`
+
+`modeltranslation` must be first in `INSTALLED_APPS`:
+
+```python
+INSTALLED_APPS = ["modeltranslation"] + INSTALLED_APPS
+
+INSTALLED_APPS += [
+    "eve_sde",
+]
+```
+
+### Load SDE Data
+
+```bash
+python manage.py migrate
+python manage.py esde_load_sde
+```
+
+### Keep SDE Current (Celery Beat)
+
+SDE updates are released after each EVE downtime. Add a daily check task (see the Periodic Tasks section below).
+
+---
 
 ## Updating
 
-### Standard Update (Systemd / bare metal)
+### Systemd / Bare Metal
 
 ```bash
-pip install --upgrade git+https://github.com/Thrainkrilleve/corp-inventory.git
+pip install --upgrade git+https://github.com/Thrainkrilleve/corp-inventory.git@v0.1.31
 python manage.py migrate
 python manage.py collectstatic --noinput
 supervisorctl restart myauth:
 ```
 
-### Docker Update
+### Docker
 
 ```bash
-# Enter the container
 docker compose exec allianceauth_gunicorn bash
-
-# Reinstall the package
-pip install --upgrade git+https://github.com/Thrainkrilleve/corp-inventory.git
-
-# Update requirements.txt with new version
-
-allianceauth-corp-inventory @ git+https://github.com/Thrainkrilleve/corp-inventory.git@v0.1.27
-
-# Apply migrations and collect static files
+pip install --upgrade git+https://github.com/Thrainkrilleve/corp-inventory.git@v0.1.31
 auth migrate
 auth collectstatic --noinput
-
-# Exit and restart
 exit
-
-docker compose build
-
 docker compose restart
+```
+
+Update your `requirements.txt` pin:
+```
+allianceauth-corp-inventory @ git+https://github.com/Thrainkrilleve/corp-inventory.git@v0.1.31
 ```
 
 ### After Updating
 
-1. Check the [CHANGELOG.md](CHANGELOG.md) for any breaking changes
-2. Verify static files are updated: `python manage.py collectstatic`
-3. Visit the **Diagnostics & Logs** page in the app to verify everything is working
-4. Check for any new permissions that need to be granted
+1. Check [CHANGELOG.md](CHANGELOG.md) for any breaking changes
+2. Visit **Corp Inventory  Diagnostics & Logs** to verify everything is working
 
-### Checking Current Version
-
-In the Django shell:
-
-```python
-python manage.py shell
-
-import corp_inventory
-print(corp_inventory.__version__)
-```
+---
 
 ## Configuration
 
-Put these settings in your `local.py`:
+Put these optional settings in your `local.py`:
 
 ```python
-# How often to sync hangar data (in minutes)
+# How often to sync hangar data (in minutes, default: 30)
 CORPINVENTORY_SYNC_INTERVAL = 30
 
-# Maximum age of data before requiring refresh (in hours)
+# Maximum age of data before requiring refresh (in hours, default: 24)
 CORPINVENTORY_DATA_MAX_AGE = 24
 
-# Enable notifications for hangar transactions
+# Enable notifications for hangar transactions (default: True)
 CORPINVENTORY_ENABLE_NOTIFICATIONS = True
 
-# Minimum value (ISK) for transaction alerts
-CORPINVENTORY_ALERT_THRESHOLD = 100000000  # 100M ISK
+# Minimum value (ISK) for transaction alerts (default: 100M)
+CORPINVENTORY_ALERT_THRESHOLD = 100000000
 ```
+
 ## Periodic Tasks
 
-The app uses Celery to run periodic sync tasks. Make sure your Alliance Auth Celery beat scheduler is running.
-
-Add to your `local.py` settings:
+Add to your `local.py`:
 
 ```python
-CELERYBEAT_SCHEDULE['corp_inventory_sync'] = {
-    'task': 'corp_inventory.tasks.sync_all_corporations',
-    'schedule': crontab(minute='*/30'),  # Run every 30 minutes
+from celery.schedules import crontab
+
+CELERYBEAT_SCHEDULE["corp_inventory_sync"] = {
+    "task": "corp_inventory.tasks.sync_all_corporations",
+    "schedule": crontab(minute="*/30"),
 }
+
+# Only needed if using django-eveonline-sde
+if "eve_sde" in INSTALLED_APPS:
+    CELERYBEAT_SCHEDULE["EVE SDE :: Check for SDE Updates"] = {
+        "task": "eve_sde.tasks.check_for_sde_updates",
+        "schedule": crontab(minute="0", hour="12"),  # daily at 12:00 UTC
+    }
 ```
 
-### Theme Support
+## Theme Support
 
-Corp Inventory is fully compatible with Alliance Auth's theme system:
+Corp Inventory adapts to Alliance Auth's theme system automatically  light/dark mode, aa-gdpr, and any Bootstrap-based custom theme are supported via CSS variables with no extra configuration required.
 
-- **Light/Dark Mode**: The app automatically adapts its styling to match your selected theme
-- **aa-gdpr Integration**: Works seamlessly with the aa-gdpr theme module
-- **Custom Themes**: Compatible with any Alliance Auth theme package
-- **Theme Variables**: Uses Bootstrap CSS variables for consistent styling across themes
-
-The app will automatically inherit your alliance's theme colors and dark mode preferences without any additional configuration.
+---
 
 ## Usage
 
 ### Automatic Syncing
 
-The app will automatically sync corporation hangar data based on the configured interval. You can also manually trigger a sync from the web interface if you have the appropriate permissions.
-
-### Setting Up Alert Rules
-
-1. Go to Django admin > Corp Inventory > Alert Rules
-2. Create a new alert rule
-3. Configure the conditions (item type, value threshold, etc.)
-4. Select users to notify
-5. Save and activate the rule
-
-### Viewing Hangars
-
-1. Navigate to Corp Inventory from the main menu
-2. Select a corporation to view
-3. Use filters to narrow down items by division, location, or search
-4. Click on any item for detailed history
+Hangar data syncs on the configured interval (default every 30 minutes). A manual **Sync Now** button is available in the app for users with the `manage_tracking` permission.
 
 ### Transaction Logs
 
-Transaction logs automatically capture every change detected between syncs:
-- **ADD** -- new items appearing in a hangar
-- **REMOVE** -- items that have left a hangar
-- **CHANGE** -- quantity changes on an existing stack
-- **MOVE** -- items that have moved to a different location or structure
+Every change detected between syncs is recorded:
 
-The Statistics page shows a 30-day summary broken down by transaction type.
+| Type | Description |
+|---|---|
+| `ADD` | New item appeared in a hangar |
+| `REMOVE` | Item left a hangar |
+| `CHANGE` | Quantity changed on an existing stack |
+| `MOVE` | Item moved to a different location or structure |
+
+### Alert Rules
+
+Configure in Django admin  **Corp Inventory  Alert Rules**. Watch for specific type IDs, value thresholds, or quantity changes, and choose which Alliance Auth users receive notifications.
+
+---
 
 ## Troubleshooting
 
-### Use the Built-in Diagnostics Page
+### Built-in Diagnostics Page
 
-Navigate to **Corp Inventory â†’ Diagnostics & Logs** to check:
-- Valid ESI tokens for each corporation
+Navigate to **Corp Inventory  Diagnostics & Logs** for:
+
+- ESI token validity per corporation
 - Character authentication status
-- Corporation configuration
-- Last sync times
-- Item and transaction counts
-- Recent log entries
+- Last sync times and item/transaction counts
+- Recent log output
 - Common issues with solutions
 
-**This should be your first stop when debugging sync issues!**
+**Start here before checking anything else.**
 
 ### Viewing Logs
-
-**In the App:**
-- Go to Corp Inventory â†’ Diagnostics & Logs
-- Scroll to "Recent Log Entries" section
-- Shows last 100 log lines from the app
-
-**Via Command Line:**
 
 ```bash
 # Docker
@@ -287,113 +288,50 @@ docker logs -f allianceauth_worker
 # Systemd
 journalctl -u allianceauth-beat -f
 journalctl -u allianceauth-worker -f
-
-# Django logs (if file logging enabled)
-tail -f /path/to/your/logs/django.log
 ```
 
-**Manual Test Sync:**
+### Manual Test Sync
 
 ```bash
 python manage.py shell
-
+```
+```python
 from corp_inventory.tasks import sync_all_corporations
 sync_all_corporations()
-# Watch output for errors
 ```
 
 ### Common Issues
 
-1. **No valid token found**
-   - A Corporation Director or CEO must authenticate with Alliance Auth
-   - They must add an ESI token with all required scopes:
-     - `esi-assets.read_corporation_assets.v1`
-     - `esi-corporations.read_divisions.v1`
-     - `esi-universe.read_structures.v1`
-   - Token must not be expired
-   - **Fix:** Have Director/CEO add token via Alliance Auth dashboard
+**No valid token found**
+A Corporation Director or CEO must authenticate with Alliance Auth and add a token with all required scopes. The token must not be expired.
 
-2. **No characters found**
-   - No one from the corporation has authenticated with Alliance Auth
-   - **Fix:** Have a Director/CEO log in and add their character
+**No characters found**
+No one from the corporation has authenticated with Alliance Auth. Have a Director/CEO log in and add their character.
 
-3. **Sync completes but no items appear**
-   - Check that items are in corporation hangars (not personal hangars)
-   - Items must be in CorpSAG1-7 divisions
-   - Items in containers may not appear
-   - Check the diagnostics page for item counts
-   - **Fix:** View diagnostics page, check logs for ESI errors
+**Sync completes but no items appear**
+Items must be in corporation hangars (`CorpSAG1``CorpSAG7`). Items in personal hangars or containers are not tracked. Check the Diagnostics page for item counts and ESI errors.
 
-4. **"Items in Database: 0" after sync**
-   - Token may not have correct permissions
-   - Character may not be a Director/CEO
-   - Corporation may genuinely have empty hangars
-   - **Fix:** Check diagnostics page, verify token scopes
+**Missing ESI scopes**
+All five scopes listed in Step 3 are required. Have the Director/CEO re-authenticate and confirm the scopes are granted.
 
-5. **Static files not loading (CSS/JS broken)**
-   - Run `python manage.py collectstatic`
-   - Restart your web server
-   - Check static files configuration in `local.py`
-   - The diagnostics page will show if tokens are valid
-
-### No Items Appearing
-
-1. **Verify items are in corporation hangars**
-   - Items must be in CorpSAG1-7 (corporation hangars)
-   - Items in containers or personal hangars won't appear
-
-2. **Check sync status**
-   - Use the Diagnostics page to verify sync completed successfully
-   - Look for error messages in the diagnostics
-
-3. **Database migration issue**
-   - Early versions had a migration bug with `division_id`
-   - If you installed before the fix, run: `python manage.py migrate corp_inventory --fake-initial`
-   - Then run: `python manage.py migrate corp_inventory`
-
-### Token/Permission Issues
-
-**Token expired or invalid:**
-- Have the character owner log out and back into Alliance Auth
-- Re-add their ESI token with all required scopes
-- Check the Diagnostics page to verify token is valid
-
-**Missing ESI scopes:**
-Required scopes:
-- `esi-assets.read_corporation_assets.v1`
-- `esi-corporations.read_divisions.v1`
-- `esi-universe.read_structures.v1`
+**Static files not loading**
+Run `python manage.py collectstatic` and restart your web server.
 
 ### Performance
 
 For large inventories (10,000+ items):
-- Increase `CORPINVENTORY_SYNC_INTERVAL` to reduce frequency
-- Consider adding database indexes (already included in migrations)
-- Monitor Celery worker performance
+- Increase `CORPINVENTORY_SYNC_INTERVAL` to reduce sync frequency
+- Install the optional SDE integration to eliminate per-type ESI calls during sync
+- Monitor Celery worker performance via the Diagnostics page
 
-### Getting Help
-
-1. Check the **Diagnostics** page in the app
-2. Review Django logs for detailed error messages  
-3. Check Celery logs: `tail -f /path/to/logs/celery.log`
-4. Open an issue on GitHub with diagnostic information
+---
 
 ## Development
 
-### Setting Up Development Environment
-
 ```bash
-# Clone the repository
 git clone https://github.com/Thrainkrilleve/corp-inventory.git
 cd allianceauth-corp-inventory
-
-# Install in editable mode
-pip install -e .
-
-# Install development dependencies
 pip install -e .[dev]
-
-# Set up pre-commit hooks
 pre-commit install
 ```
 
@@ -405,30 +343,25 @@ python runtests.py
 
 ### Code Style
 
-This project uses:
-- Black for code formatting
-- isort for import sorting
-- flake8 for linting
+- **Black**  code formatting
+- **isort**  import sorting
+- **flake8**  linting
+
+---
 
 ## Contributing
 
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+Contributions are welcome. Fork the repo, create a feature branch, and open a pull request.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT  see [LICENSE](LICENSE).
 
 ## Credits
 
 - Built for [Alliance Auth](https://gitlab.com/allianceauth/allianceauth)
-- EVE Online and the EVE logo are the registered trademarks of CCP hf.
+- EVE Online and the EVE logo are registered trademarks of CCP hf.
 
 ## Support
 
-For issues, questions, or feature requests, please use the [GitHub issue tracker](https://github.com/Thrainkrilleve/corp-inventory/issues).
-
+[GitHub Issues](https://github.com/Thrainkrilleve/corp-inventory/issues)
