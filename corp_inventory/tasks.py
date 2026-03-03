@@ -7,6 +7,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 from celery import shared_task
+from django.apps import apps
 from django.utils import timezone
 from django.db import transaction
 from esi.models import Token
@@ -425,11 +426,27 @@ def process_assets(
     type_cache = known_type_names.copy()
     unknown_types = types_to_fetch - set(type_cache.keys())
     if unknown_types:
-        logger.info(f"Fetching {len(unknown_types)} new type name(s) from ESI")
-        for type_id in unknown_types:
-            type_info = CorpInventoryManager.get_type_info(type_id)
-            if type_info:
-                type_cache[type_id] = type_info.get("name", f"Unknown Type {type_id}")
+        # Bulk SDE lookup first — one DB query instead of N ESI HTTP calls.
+        # Falls back to ESI for any types not yet in the SDE (e.g. very new items).
+        if apps.is_installed("eve_sde"):
+            try:
+                from eve_sde.models import ItemType as _SDEItemType
+                sde_names = dict(
+                    _SDEItemType.objects.filter(id__in=unknown_types).values_list("id", "name")
+                )
+                type_cache.update(sde_names)
+                unknown_types -= set(sde_names.keys())
+                if sde_names:
+                    logger.debug(f"SDE resolved {len(sde_names)} type name(s)")
+            except Exception as sde_err:
+                logger.warning(f"SDE bulk type lookup failed, falling back to ESI: {sde_err}")
+
+        if unknown_types:
+            logger.info(f"Fetching {len(unknown_types)} new type name(s) from ESI")
+            for type_id in unknown_types:
+                type_info = CorpInventoryManager.get_type_info(type_id)
+                if type_info:
+                    type_cache[type_id] = type_info.get("name", f"Unknown Type {type_id}")
 
     # ------------------------------------------------------------------ #
     # 4. Prefetch all existing HangarItems and divisions into memory
@@ -676,18 +693,40 @@ def get_or_create_location(location_id: int, token: Token) -> Location:
     region_name = ""
 
     if system_id:
-        system_info = CorpInventoryManager.get_solar_system_info(system_id)
-        if system_info:
-            system_name = system_info.get("name", "")
-            constellation_id = system_info.get("constellation_id")
-            if constellation_id:
-                constellation_info = CorpInventoryManager.get_constellation_info(constellation_id)
-                if constellation_info:
-                    region_id = constellation_info.get("region_id")
-                    if region_id:
-                        region_info = CorpInventoryManager.get_region_info(region_id)
-                        if region_info:
-                            region_name = region_info.get("name", "")
+        # Prefer a single SDE join (system → constellation → region) over
+        # 3 serial ESI calls that add latency and eat rate-limit budget.
+        _resolved_via_sde = False
+        if apps.is_installed("eve_sde"):
+            try:
+                from eve_sde.models import SolarSystem as _SDESolarSystem
+                sde_sys = _SDESolarSystem.objects.select_related(
+                    "constellation__region"
+                ).get(id=system_id)
+                system_name = sde_sys.name
+                if sde_sys.constellation_id:
+                    region_id = sde_sys.constellation.region_id
+                    region_name = (
+                        sde_sys.constellation.region.name
+                        if sde_sys.constellation and sde_sys.constellation.region
+                        else ""
+                    )
+                _resolved_via_sde = True
+            except Exception:
+                pass  # SDE miss — fall through to ESI chain
+
+        if not _resolved_via_sde:
+            system_info = CorpInventoryManager.get_solar_system_info(system_id)
+            if system_info:
+                system_name = system_info.get("name", "")
+                constellation_id = system_info.get("constellation_id")
+                if constellation_id:
+                    constellation_info = CorpInventoryManager.get_constellation_info(constellation_id)
+                    if constellation_info:
+                        region_id = constellation_info.get("region_id")
+                        if region_id:
+                            region_info = CorpInventoryManager.get_region_info(region_id)
+                            if region_info:
+                                region_name = region_info.get("name", "")
 
     resolved_name = location_data.get("name", f"Location {location_id}")
 

@@ -58,6 +58,49 @@ Running migrations:
   Applying corp_inventory.0001_initial... OK
 ```
 
+### 4a. Optional: EVE SDE Integration
+
+[django-eveonline-sde](https://pypi.org/project/django-eveonline-sde/) provides a local DB
+copy of the EVE SDE (item types, solar systems, constellations, regions). When installed,
+corp-inventory will use it for type name and location hierarchy lookups instead of making
+individual ESI calls — this makes each sync faster and reduces ESI rate-limit usage.
+
+**Install the package:**
+
+```bash
+pip install allianceauth-corp-inventory[sde]
+```
+
+**Configure `local.py`:** `modeltranslation` must be first in `INSTALLED_APPS`:
+
+```python
+INSTALLED_APPS = ["modeltranslation"] + INSTALLED_APPS
+
+INSTALLED_APPS += [
+    "eve_sde",
+]
+```
+
+**Run migrations and load the SDE data:**
+
+```bash
+python manage.py migrate
+python manage.py esde_load_sde
+```
+
+**Add a Celery Beat task to keep the SDE current** (SDE updates happen after downtime):
+
+```python
+if "eve_sde" in INSTALLED_APPS:
+    CELERYBEAT_SCHEDULE["EVE SDE :: Check for SDE Updates"] = {
+        "task": "eve_sde.tasks.check_for_sde_updates",
+        "schedule": crontab(minute="0", hour="12"),  # daily at 12:00 UTC
+    }
+```
+
+The SDE integration is fully optional — the app falls back to ESI automatically if
+`eve_sde` is not installed.
+
 ### 5. Collect Static Files
 
 ```bash

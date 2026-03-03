@@ -6,6 +6,7 @@ Handles all ESI API calls for fetching corporation hangar data
 import logging
 from typing import Dict, List, Optional
 
+from django.apps import apps
 from django.core.cache import cache
 from esi.clients import EsiClientProvider
 from esi.models import Token
@@ -13,6 +14,11 @@ from esi.models import Token
 logger = logging.getLogger(__name__)
 
 esi = EsiClientProvider()
+
+
+def _sde_available() -> bool:
+    """Return True when django-eveonline-sde is installed and its models are ready."""
+    return apps.is_installed("eve_sde")
 
 
 class CorpInventoryManager:
@@ -148,101 +154,125 @@ class CorpInventoryManager:
     @staticmethod
     def get_type_info(type_id: int) -> Optional[Dict]:
         """
-        Fetch type information
-        
+        Fetch type information. Uses eve_sde DB lookup when available;
+        falls back to ESI Universe endpoint.
+
         Args:
             type_id: Type ID
-            
+
         Returns:
             Type information dictionary or None
         """
+        if _sde_available():
+            try:
+                from eve_sde.models import ItemType as _SDEItemType
+                obj = _SDEItemType.objects.get(id=type_id)
+                return {"type_id": obj.id, "name": obj.name}
+            except Exception:
+                pass  # SDE miss — fall through to ESI
+
         try:
             client = esi.client
             type_info = client.Universe.get_universe_types_type_id(
                 type_id=type_id
             ).results()
-            
             return type_info
-            
         except Exception as e:
-            logger.warning(
-                f"Error fetching type {type_id}: {e}"
-            )
+            logger.warning(f"Error fetching type {type_id}: {e}")
             return None
     
     @staticmethod
     def get_solar_system_info(system_id: int) -> Optional[Dict]:
         """
-        Fetch solar system information
-        
+        Fetch solar system information. Uses eve_sde DB lookup when available;
+        falls back to ESI Universe endpoint.
+
         Args:
             system_id: Solar system ID
-            
+
         Returns:
             Solar system information dictionary or None
         """
+        if _sde_available():
+            try:
+                from eve_sde.models import SolarSystem as _SDESolarSystem
+                obj = _SDESolarSystem.objects.get(id=system_id)
+                return {
+                    "name": obj.name,
+                    "constellation_id": obj.constellation_id,
+                    "security_status": obj.security_status,
+                }
+            except Exception:
+                pass  # SDE miss — fall through to ESI
+
         try:
             client = esi.client
             system = client.Universe.get_universe_systems_system_id(
                 system_id=system_id
             ).results()
-            
             return system
-            
         except Exception as e:
-            logger.warning(
-                f"Error fetching system {system_id}: {e}"
-            )
+            logger.warning(f"Error fetching system {system_id}: {e}")
             return None
     
     @staticmethod
     def get_constellation_info(constellation_id: int) -> Optional[Dict]:
         """
-        Fetch constellation information
-        
+        Fetch constellation information. Uses eve_sde DB lookup when available;
+        falls back to ESI Universe endpoint.
+
         Args:
             constellation_id: Constellation ID
-            
+
         Returns:
             Constellation information dictionary or None
         """
+        if _sde_available():
+            try:
+                from eve_sde.models import Constellation as _SDEConstellation
+                obj = _SDEConstellation.objects.get(id=constellation_id)
+                return {"name": obj.name, "region_id": obj.region_id}
+            except Exception:
+                pass  # SDE miss — fall through to ESI
+
         try:
             client = esi.client
             constellation = client.Universe.get_universe_constellations_constellation_id(
                 constellation_id=constellation_id
             ).results()
-            
             return constellation
-            
         except Exception as e:
-            logger.warning(
-                f"Error fetching constellation {constellation_id}: {e}"
-            )
+            logger.warning(f"Error fetching constellation {constellation_id}: {e}")
             return None
     
     @staticmethod
     def get_region_info(region_id: int) -> Optional[Dict]:
         """
-        Fetch region information
-        
+        Fetch region information. Uses eve_sde DB lookup when available;
+        falls back to ESI Universe endpoint.
+
         Args:
             region_id: Region ID
-            
+
         Returns:
             Region information dictionary or None
         """
+        if _sde_available():
+            try:
+                from eve_sde.models import Region as _SDERegion
+                obj = _SDERegion.objects.get(id=region_id)
+                return {"name": obj.name, "region_id": obj.id}
+            except Exception:
+                pass  # SDE miss — fall through to ESI
+
         try:
             client = esi.client
             region = client.Universe.get_universe_regions_region_id(
                 region_id=region_id
             ).results()
-            
             return region
-            
         except Exception as e:
-            logger.warning(
-                f"Error fetching region {region_id}: {e}"
-            )
+            logger.warning(f"Error fetching region {region_id}: {e}")
             return None
 
 

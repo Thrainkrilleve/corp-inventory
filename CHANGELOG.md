@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.31] - 2026-03-02
+
+### Added
+- **Optional django-eveonline-sde integration**  when `eve_sde` is present in `INSTALLED_APPS`, the app now resolves item type names via a single bulk SDE DB query instead of one ESI HTTP call per unknown type, and resolves the solar system → constellation → region chain with a single `select_related` join instead of three serial ESI calls. Both operations automatically fall back to ESI if the SDE is not installed or a lookup misses. Install with `pip install allianceauth-corp-inventory[sde]`.
+
+---
+
 ## [0.1.30] - 2026-03-02
 
 ### Fixed
