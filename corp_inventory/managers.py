@@ -8,12 +8,19 @@ from typing import Dict, List, Optional
 
 from django.apps import apps
 from django.core.cache import cache
-from esi.clients import EsiClientProvider
+from esi.openapi_clients import ESIClientProvider as EsiClientProvider
 from esi.models import Token
+
+from corp_inventory import __version__
 
 logger = logging.getLogger(__name__)
 
-esi = EsiClientProvider()
+esi = EsiClientProvider(
+    compatibility_date="2026-05-19",
+    ua_appname="CorpInventory",
+    ua_version=__version__,
+    ua_url="https://github.com/Thrainkrilleve/corp-inventory",
+)
 
 
 def _sde_available() -> bool:

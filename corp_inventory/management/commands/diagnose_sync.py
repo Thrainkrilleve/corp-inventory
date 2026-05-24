@@ -175,9 +175,15 @@ class Command(BaseCommand):
         self.stdout.write("-" * 50)
         
         try:
-            from esi.clients import EsiClientProvider
-            
-            esi = EsiClientProvider()
+            from esi.openapi_clients import ESIClientProvider as EsiClientProvider
+            from corp_inventory import __version__
+
+            esi = EsiClientProvider(
+                compatibility_date="2026-05-19",
+                ua_appname="CorpInventory",
+                ua_version=__version__,
+                ua_url="https://github.com/Thrainkrilleve/corp-inventory",
+            )
             
             # Try a simple ESI call
             client = esi.client
